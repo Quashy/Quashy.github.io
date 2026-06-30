@@ -29,7 +29,7 @@ export default defineConfig({
      */
     nav: [
       { text: '首页', link: '/' },
-      { text: '文章', link: '/2026/markdown-examples' }
+      { text: '文章', link: '/2026/opencode-go-ccw' }
     ],
 
     // ========== 左侧边栏 ==========
@@ -49,8 +49,7 @@ export default defineConfig({
         text: '2026',
         collapsed: true,
         items: [
-          { text: 'Markdown Examples', link: '/2026/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/2026/api-examples' }
+          { text: 'OpenCode GO 接入 CC Switch 指南', link: '/2026/opencode-go-ccw' }
         ]
       },
     ],
