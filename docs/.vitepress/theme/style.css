@@ -234,3 +234,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+/**
+ * Component: medium-zoom（图片点击缩放）
+ * -------------------------------------------------------------------------- */
+/* 确保缩放遮罩与图片层级高于 VitePress 导航栏（最高 z-index: 60） */
+.medium-zoom-overlay {
+  z-index: 100;
+}
+.medium-zoom-image--opened {
+  z-index: 101;
+}
+
