@@ -1,10 +1,12 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 /**
  * VitePress 站点配置文件
  * 参考文档: https://vitepress.dev/reference/site-config
  */
-export default defineConfig({
+export default withMermaid(
+  defineConfig({
   // ========== 站点基本信息 ==========
   /** 页面语言，影响搜索分词、时间格式等 */
   lang: "zh-CN",
@@ -105,4 +107,11 @@ export default defineConfig({
     // footer: { message: '...', copyright: '...' },  // 页脚
     // editLink: { pattern: '...' },   // "编辑此页"链接
   }
-})
+  }),
+  {
+    // Mermaid 配置（亮色模式生效，暗色模式由插件自动切换）
+    mermaid: {
+      // 参考: https://mermaid.js.org/config/schema-docs/config.html
+    },
+  }
+)
