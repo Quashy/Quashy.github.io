@@ -107,11 +107,27 @@ export default withMermaid(
     // logo: '/logo.svg',              // 导航栏 logo 图片路径
     // footer: { message: '...', copyright: '...' },  // 页脚
     // editLink: { pattern: '...' },   // "编辑此页"链接
-    },
-    {
-      // Mermaid 配置（亮色模式生效，暗色模式由插件自动切换）
-      mermaid: {
-        // 参考: https://mermaid.js.org/config/schema-docs/config.html
-      },
-    })
+  },
+
+  // ========== Markdown 渲染配置 ==========
+  /**
+   * markdown: VitePress 的 Markdown 渲染选项（与 themeConfig 同级，属于站点配置）
+   * lineNumbers: 为所有代码块默认显示行号
+   * 单个代码块可用 ```ts:no-line-numbers 临时关闭，或 ```ts:line-numbers 临时开启
+   * 参考: https://vitepress.dev/reference/markdown#lines-numbers
+   */
+  markdown: {
+    lineNumbers: true,
+  },
+
+  // ========== Mermaid 配置 ==========
+  /**
+   * mermaid: Mermaid 图表渲染配置（亮色模式生效，暗色模式由插件自动切换）
+   * 由 vitepress-plugin-mermaid 的 withMermaid 包装器读取
+   * 参考: https://mermaid.js.org/config/schema-docs/config.html
+   */
+  mermaid: {
+    // 在此添加 Mermaid 主题/样式等配置
+  },
+  }),
 )
