@@ -53,6 +53,13 @@ export default withMermaid(
     ['meta', { name: 'referrer', content: 'no-referrer-when-downgrade' }],
 
     /**
+     * Google Search Console 站点所有权验证
+     * 验证方式：HTML meta 标签（与下方 OG/Twitter meta 同构，版本管理随代码走）
+     * 验证资源：https://quashy.github.io（网址前缀）
+     */
+    ['meta', { name: 'google-site-verification', content: 'DO7lsr3dPzD6lRE8guJbbmJt2OPx6YgyS1xzNInIQO8' }],
+
+    /**
      * —— Open Graph 全站默认（社交分享卡片） ——
      * 按页面变化的 og:title / og:description / og:url / og:type / og:image
      * 由下方 transformPageData 钩子动态注入并覆盖。
