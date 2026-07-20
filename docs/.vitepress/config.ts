@@ -36,6 +36,65 @@ const RSS: RSSOptions = {
   ignoreHome: true,
   // filter 不限定年份：所有 /20\d{2}/ 目录下的文章自动收录，未来 2027/2028 无需改配置
   filter: (post) => !!post.url && /^\/\d{4}\//.test(post.url),
+
+  /**
+   * markdownOptions.style：向 RSS 内容注入基础样式
+   * 用于补偿 RSS 阅读器缺失的 VitePress 主题样式（代码块、表格、图片自适应）
+   */
+  markdownOptions: {
+    style: `
+      /* RSS 代码块基础样式（Shiki CSS 变量已被 transform 清理，需提供回退配色） */
+      pre {
+        background: #1e1e1e;
+        padding: 16px;
+        border-radius: 6px;
+        overflow-x: auto;
+        color: #d4d4d4;
+        line-height: 1.6;
+      }
+      pre code {
+        color: #d4d4d4;
+        background: none;
+        font-family: 'Cascadia Code', 'Fira Code', Consolas, monospace;
+        font-size: 14px;
+      }
+      /* RSS 表格样式 */
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 16px 0;
+      }
+      th, td {
+        border: 1px solid #d0d7de;
+        padding: 8px 12px;
+        text-align: left;
+      }
+      th {
+        background: #f6f8fa;
+        font-weight: 600;
+      }
+      /* RSS 图片自适应 */
+      img {
+        max-width: 100%;
+        height: auto;
+      }
+    `,
+  },
+
+  /**
+   * transform：后处理 RSS HTML 内容
+   * 1. 清理 VitePress Shiki 语法高亮的 CSS 自定义属性（RSS 阅读器缺少这些变量）
+   * 2. 修复相对路径图片 → 绝对路径（确保 RSS 阅读器可加载图片）
+   */
+  transform(html) {
+    // 移除 Shiki CSS 变量（--shiki-light:* / --shiki-dark:*），回退到 <style> 中的基础颜色
+    html = html.replace(/\s*--shiki-[a-z-]+:[^;]*;?/g, '')
+    // 清理因移除 Shiki 变量而产生的空 style 属性
+    html = html.replace(/\s+style="\s*"/g, '')
+    // 修复相对路径图片：/xxx/01.png → https://quashy.github.io/xxx/01.png
+    html = html.replace(/<img src="\/([^"]+)"/g, `<img src="${SITE_URL}/$1"`)
+    return html
+  },
 }
 
 
