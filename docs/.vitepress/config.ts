@@ -30,6 +30,7 @@ const RSS: RSSOptions = {
     name: '秦晖洋',
     link: 'https://github.com/Quashy',
   },
+  image: SITE_URL + DEFAULT_OG_IMAGE,  // RSS 阅读器中显示的频道图标
   icon: true,     // 导航栏社交图标区显示 RSS 图标
   filename: 'feed.xml',  // .xml 后缀确保服务器返回 charset=utf-8，避免中文乱码
   ignoreHome: true,
