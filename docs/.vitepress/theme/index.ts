@@ -23,6 +23,23 @@ const initZoom = () => {
   })
 }
 
+/**
+ * 为侧边栏文章链接补充原生悬浮提示。
+ * 链接文本仍完整保留在 DOM 中，CSS 只负责单行省略，避免影响可访问名称。
+ */
+const initSidebarTooltips = () => {
+  const links = document.querySelectorAll<HTMLAnchorElement>('.VPSidebarItem a.VPLink')
+  links.forEach((link) => {
+    const text = link.querySelector<HTMLElement>('.text')
+    const label = text?.textContent?.trim()
+    if (text && label && text.scrollWidth > text.clientWidth) {
+      link.title = label
+    } else {
+      link.removeAttribute('title')
+    }
+  })
+}
+
 export default {
   extends: DefaultTheme,
   Layout: () => {
@@ -36,8 +53,11 @@ export default {
   },
   enhanceApp({ app, router, siteData }) {
     if (typeof window !== 'undefined') {
-      // 首屏图片缩放：延迟 200ms 确保 VitePress 已渲染完文章内容里的 <img>
-      setTimeout(() => initZoom(), 200)
+      // 延迟 200ms，确保首屏文章图片与侧边栏均已渲染。
+      setTimeout(() => {
+        initZoom()
+        initSidebarTooltips()
+      }, 200)
 
       // 首屏与 SPA 路由切换后触发不蒜子统计 + 为新页面图片注册缩放
       // onAfterRouteChange 为 VitePress 1.x 推荐钩子（onAfterRouteChanged 已废弃）
@@ -49,6 +69,7 @@ export default {
         nextTick(() => {
           triggerBusuanzi()
           initZoom()
+          initSidebarTooltips()
         })
       }
     }

@@ -138,6 +138,18 @@
 }
 
 /**
+ * Component: Sidebar（长标题单行省略）
+ * -------------------------------------------------------------------------- */
+.VPSidebarItem a.VPLink {
+  min-width: 0;
+}
+.VPSidebarItem a.VPLink > .text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/**
  * Component: Site Stats（首页访客统计卡片）
  * -------------------------------------------------------------------------- */
 /* 让不蒜子容器在脚本加载前也可见，配合占位符「--」消除布局抖动（CLS） */
