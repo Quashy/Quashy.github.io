@@ -82,4 +82,4 @@ pnpm docs:preview     # 本地预览构建产物
 
 - 运行 `pnpm docs:build` 确认无报错（图片路径错误、frontmatter 语法错误均会在此暴露）。
 - 可选 `pnpm docs:dev` 人工复核：图片加载、链接跳转、右侧目录、本地搜索。
-- 文章 slug 建议用英文短横线命名（如 `opencode-go-ccw`），与 `docs/{year}/<slug>.md` 文件名及 `docs/public/<slug>/` 目录名保持一致。
+- 文章 slug 使用英文短横线命名（如 `opencode-go-ccw`）；正文文件为 `docs/{year}/YYYY-MM-DD-<slug>.md`，日期与 frontmatter `date` 一致。`docs/public/<slug>/` 与公开路由仍只使用 slug，构建时由 `rewrites` 移除正文文件的日期前缀。

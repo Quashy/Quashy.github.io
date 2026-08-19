@@ -115,6 +115,12 @@ export default withMermaid(
   /** 开启最后更新时间（基于 Git 提交记录） */
   lastUpdated: true,
 
+  /**
+   * 源文件使用发布日期前缀，便于在 IDE 文件树中按发布时间排序；
+   * 构建时移除日期前缀，保持已发布文章的 URL 与不蒜子 page_pv 统计键稳定。
+   */
+  rewrites: (id) => id.replace(/^(\d{4})[\\/]\d{4}-\d{2}-\d{2}-(.+\.md)$/, '$1/$2'),
+
   // ========== Head 元数据 ==========
   /**
    * head: 注入到 HTML <head> 的标签

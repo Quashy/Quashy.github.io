@@ -15,7 +15,7 @@
 | 路径 | 职责 |
 | --- | --- |
 | `docs/index.md` | 博客首页，以及「浏览文章」入口 |
-| `docs/{year}/<slug>.md` | 按年份保存的文章正文 |
+| `docs/{year}/YYYY-MM-DD-<slug>.md` | 按年份保存的文章正文，文件名日期前缀用于 IDE 排序 |
 | `docs/public/<slug>/` | 文章本地图片等静态资源 |
 | `docs/.vitepress/config.ts` | 顶部导航、侧边栏、搜索和站点元信息 |
 | `docs/.vitepress/theme/` | 自定义样式、图片缩放和不蒜子统计逻辑 |
@@ -49,7 +49,8 @@ pnpm docs:preview
 
 ## 文章内容约定
 
-- 文件名使用英文小写短横线形式的 slug，例如 `from-quanpin-to-shuangpin.md`。
+- 文件名使用 `YYYY-MM-DD-<slug>.md`，其中日期必须与 frontmatter `date` 的日期部分一致，slug 使用英文小写短横线，例如 `2026-07-19-from-quanpin-to-shuangpin.md`。
+- `docs/.vitepress/config.ts` 的 `rewrites` 会在构建路由中移除日期前缀；导航、侧边栏、README 和站内链接始终使用不含日期前缀的稳定公开路由，例如 `/2026/from-quanpin-to-shuangpin`。
 - 文章至少包含 `date`、`title` 和 `outline: deep` frontmatter，并在正文保留与标题一致的一级标题。`date` 格式为 `YYYY-MM-DD HH:mm`（北京时间），供 RSS 订阅源生成准确的发布时间。
 - 正文章节以二级标题为主，需要细分时使用三级标题，使右侧目录能够正确生成。
 - 图片复制到 `docs/public/<slug>/`，使用 `01.png`、`02.png` 等稳定文件名；保留源文件，不执行移动或删除。
@@ -60,17 +61,18 @@ pnpm docs:preview
 
 发布一篇新文章是一项原子操作。文章正文与下面四个发现入口必须在同一批改动中完成；任何一项缺失，都视为发布尚未完成。
 
-1. 新增 `docs/{year}/<slug>.md`，并补齐其本地资源。
+1. 新增 `docs/{year}/YYYY-MM-DD-<slug>.md`，并补齐其本地资源。
 2. 在 `docs/.vitepress/config.ts` 对应年份的 `sidebar.items` 顶部登记文章。
 3. 将 `docs/.vitepress/config.ts` 顶部导航「文章」的 `link` 更新为新文章路由。
 4. 将 `docs/index.md` 首页「浏览文章」按钮的 `link` 更新为同一路由。
 5. 在 `README.md` 的文章列表顶部新增日期、标题和完整线上链接。
 
-统一先确定以下四个值，再复制到所有入口，避免手工重复拼写时产生漂移：
+统一先确定以下五个值，再复制到所有入口，避免手工重复拼写时产生漂移：
 
 ```text
 发布日期：<YYYY-MM-DD HH:mm>（北京时间，与 README 文章列表中的日期保持一致）
 文章标题：<title>
+源文件名：<YYYY-MM-DD>-<slug>.md（日期与发布日期一致）
 文章路由：/<year>/<slug>
 线上链接：https://quashy.github.io/<year>/<slug>
 ```
@@ -89,9 +91,10 @@ pnpm docs:preview
 
 ```powershell
 $articleSlug = "from-quanpin-to-shuangpin"
+$articleDate = "2026-07-19"
 $articleRoute = "/2026/$articleSlug"
 
-Test-Path -LiteralPath "docs/2026/$articleSlug.md"
+Test-Path -LiteralPath "docs/2026/$articleDate-$articleSlug.md"
 rg -n --fixed-strings "$articleRoute" "docs/.vitepress/config.ts" "docs/index.md" "README.md"
 pnpm docs:build
 Test-Path -LiteralPath "docs/.vitepress/dist/2026/$articleSlug.html"
