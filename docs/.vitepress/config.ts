@@ -275,7 +275,7 @@ export default withMermaid(
      */
     nav: [
       { text: '首页', link: '/' },
-      { text: '文章', link: '/2026/from-quanpin-to-shuangpin' },
+      { text: '文章', link: '/2026/understanding-sso-auth-protocols' },
       { text: '并击', link: 'https://quashy.github.io/bingji-shuangpin/' }
     ],
 
@@ -296,6 +296,7 @@ export default withMermaid(
         text: '2026',
         collapsed: true,
         items: [
+          { text: '一次登录，到底发生了什么', link: '/2026/understanding-sso-auth-protocols' },
           { text: '从全拼到双拼：我为什么做了「并击」', link: '/2026/from-quanpin-to-shuangpin' },
           { text: '如何参与开源项目', link: '/2026/how-to-contribute-to-open-source' },
           { text: '人生设计：探索你的现在', link: '/2026/designing-your-life' },

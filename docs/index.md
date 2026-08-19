@@ -10,7 +10,7 @@ hero:
   actions:
     - theme: brand
       text: 浏览文章
-      link: /2026/from-quanpin-to-shuangpin
+      link: /2026/understanding-sso-auth-protocols
     - theme: alt
       text: GitHub
       link: https://github.com/Quashy
