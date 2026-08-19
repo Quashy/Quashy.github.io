@@ -16,6 +16,13 @@ const SITE_URL = 'https://quashy.github.io'
 const DEFAULT_OG_IMAGE = '/og.png'
 
 /**
+ * Mermaid 图类型横向滚动开关（useMaxWidth: false）
+ * mermaid 的 useMaxWidth 无全局开关，需按图类型分别配置；
+ * 此处预配技术博客常用图类型，新增图类型时按同样格式补一行即可。
+ */
+const mermaidNoMaxWidth = { useMaxWidth: false }
+
+/**
  * RSS 订阅源配置（vitepress-plugin-rss）
  * 构建时自动产出 feed.rss，供 RSS 阅读器订阅
  * 参考: https://www.npmjs.com/package/vitepress-plugin-rss
@@ -379,7 +386,23 @@ export default withMermaid(
    * 参考: https://mermaid.js.org/config/schema-docs/config.html
    */
   mermaid: {
-    // 在此添加 Mermaid 主题/样式等配置
+    // useMaxWidth: false —— 图按自然尺寸渲染，配合 style.css 的 .mermaid 横向滚动，
+    // 避免复杂流程图/时序图文字被压到内容栏宽度而等比缩小看不清。
+    flowchart: mermaidNoMaxWidth,
+    sequence: mermaidNoMaxWidth,
+    class: mermaidNoMaxWidth, // 类图
+    state: mermaidNoMaxWidth, // 状态图
+    er: mermaidNoMaxWidth, // ER 图
+    gantt: mermaidNoMaxWidth, // 甘特图
+    pie: mermaidNoMaxWidth, // 饼图
+    journey: mermaidNoMaxWidth, // 用户旅程图
+    mindmap: mermaidNoMaxWidth, // 思维导图
+    timeline: mermaidNoMaxWidth, // 时间线
+    gitGraph: mermaidNoMaxWidth, // Git 分支图
+    block: mermaidNoMaxWidth, // 块图（block-beta）
+    c4: mermaidNoMaxWidth, // C4 架构图
+    quadrantChart: mermaidNoMaxWidth, // 象限图
+    requirement: mermaidNoMaxWidth, // 需求图
   },
   }),
 )

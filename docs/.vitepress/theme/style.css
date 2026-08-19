@@ -257,3 +257,17 @@
   z-index: 101;
 }
 
+/**
+ * Component: Mermaid（图表横向滚动）
+ * -------------------------------------------------------------------------- */
+/* 配合 config.ts 里 useMaxWidth: false，让超宽图按自然尺寸渲染，
+   超容器宽度时横向滑动查看，文字不被等比缩小 */
+.mermaid {
+  overflow-x: auto;
+  max-width: 100%;
+}
+.mermaid svg {
+  /* 防御：确保不被其他主题规则把 svg 压回容器宽度 */
+  max-width: none !important;
+}
+
