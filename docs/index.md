@@ -10,7 +10,7 @@ hero:
   actions:
     - theme: brand
       text: 浏览文章
-      link: /2026/understanding-sso-auth-protocols
+      link: /2026/lightweight-approval-workflow
     - theme: alt
       text: GitHub
       link: https://github.com/Quashy

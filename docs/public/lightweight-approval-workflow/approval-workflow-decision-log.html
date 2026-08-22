@@ -1,0 +1,1715 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>安全隐患治理审批流 —— 设计决策全记录</title>
+<style>
+/* ==================== RESET & BASE ==================== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --white: #FFFFFF;
+  --surface: #F7F7F8;
+  --border: #E2E2E4;
+  --text: #1A1A1E;
+  --text-secondary: #5C5C66;
+  --text-muted: #90909C;
+  --accent: #002FA7;
+  --accent-light: #E8EDF8;
+  --accent-mid: #B8C8E8;
+  --green: #1B883A;
+  --green-bg: #EAF5ED;
+  --red: #C41030;
+  --red-bg: #FDE8EC;
+  --amber: #E87800;
+  --amber-bg: #FFF4E5;
+  --code-bg: #1E1E2A;
+  --code-text: #E0E0EC;
+  --radius: 6px;
+  --max-width: 960px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+html { font-size: 16px; scroll-behavior: smooth; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", sans-serif;
+  background: var(--white);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ==================== LAYOUT ==================== */
+.container { max-width: var(--max-width); margin: 0 auto; padding: 0 32px; }
+
+/* ==================== HEADER ==================== */
+.site-header {
+  background: var(--accent);
+  color: #FFF;
+  padding: 56px 0 48px;
+  position: relative;
+  overflow: hidden;
+}
+.site-header::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0;
+  width: 240px; height: 100%;
+  background: linear-gradient(135deg, transparent 50%, rgba(255,255,255,0.06) 50%);
+  pointer-events: none;
+}
+.site-header h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-bottom: 12px;
+}
+.site-header .meta {
+  font-size: 0.875rem;
+  opacity: 0.8;
+  display: flex; flex-wrap: wrap; gap: 4px 24px;
+}
+.site-header .meta span { white-space: nowrap; }
+
+/* ==================== TOC ==================== */
+.toc {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 28px 0;
+  position: sticky; top: 0; z-index: 10;
+}
+.toc ol {
+  list-style: none; counter-reset: toc;
+  display: flex; flex-wrap: wrap; gap: 6px 20px;
+}
+.toc ol li { counter-increment: toc; font-size: 0.875rem; }
+.toc ol li a {
+  color: var(--text-secondary); text-decoration: none;
+  transition: color 0.15s;
+}
+.toc ol li a:hover { color: var(--accent); }
+.toc ol li a::before {
+  content: counter(toc) ".";
+  color: var(--accent); font-weight: 600; margin-right: 4px;
+}
+
+/* ==================== SECTIONS ==================== */
+section { padding: 48px 0; }
+section + section { border-top: 1px solid var(--border); }
+
+h2 {
+  font-size: 1.5rem; font-weight: 700; color: var(--accent);
+  margin-bottom: 24px; letter-spacing: -0.005em;
+  display: flex; align-items: center; gap: 10px;
+}
+h2::before {
+  content: '';
+  display: inline-block; width: 4px; height: 1.25em;
+  background: var(--accent); border-radius: 2px;
+}
+h3 {
+  font-size: 1.15rem; font-weight: 600; color: var(--text);
+  margin: 32px 0 16px;
+}
+h4 {
+  font-size: 1rem; font-weight: 600; color: var(--text-secondary);
+  margin: 24px 0 12px;
+}
+
+p, .para { margin-bottom: 12px; color: var(--text); }
+p strong, .para strong { color: var(--text); }
+
+ul, ol { margin: 8px 0 16px 20px; }
+li { margin-bottom: 6px; }
+
+/* ==================== TABLES ==================== */
+.table-wrap { overflow-x: auto; margin: 16px 0 24px; }
+table {
+  width: 100%; border-collapse: collapse; font-size: 0.875rem;
+  border: 1px solid var(--border);
+}
+thead { border-bottom: 2px solid var(--accent); }
+th {
+  text-align: left; padding: 10px 14px; font-weight: 600;
+  background: var(--surface); color: var(--text-secondary);
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.03em;
+}
+td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+tbody tr:nth-child(even) td { background: var(--surface); }
+tbody tr:hover td { background: var(--accent-light); }
+
+/* Trade-off table highlight */
+table.tradeoff tbody tr:nth-child(2) td { background: var(--green-bg); }
+table.tradeoff tbody tr:nth-child(2) td:first-child { font-weight: 700; color: var(--green); }
+
+/* ==================== CODE BLOCKS ==================== */
+pre {
+  background: var(--code-bg); color: var(--code-text);
+  padding: 20px 24px; border-radius: var(--radius);
+  overflow-x: auto; font-size: 0.825rem; line-height: 1.65;
+  margin: 16px 0 24px;
+  border: 1px solid #2A2A38;
+}
+pre code { font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", "Consolas", monospace; }
+code {
+  font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", "SF Mono", "Consolas", monospace;
+  background: var(--surface); padding: 2px 6px; border-radius: 3px;
+  font-size: 0.85em; color: var(--accent);
+}
+pre code { background: none; padding: 0; color: inherit; font-size: inherit; }
+
+/* SQL comments in code */
+pre .sql-comment { color: #6C6C8A; }
+pre .sql-keyword { color: #8BB8F0; }
+pre .sql-string { color: #A8D8A0; }
+
+/* ==================== ASCII DIAGRAM BLOCK ==================== */
+.ascii-diagram {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px;
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", "Consolas", monospace;
+  font-size: 0.8rem; line-height: 1.5; overflow-x: auto;
+  white-space: pre; color: var(--text-secondary); margin: 16px 0 24px;
+}
+
+/* ==================== DECISION CARD ==================== */
+.decision-card {
+  border: 1px solid var(--border); border-left: 5px solid var(--accent);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  margin: 28px 0; padding: 0;
+  background: var(--white);
+  position: relative;
+}
+.decision-card .card-header {
+  background: var(--accent-light); padding: 16px 20px;
+  border-bottom: 1px solid var(--accent-mid);
+  display: flex; align-items: baseline; gap: 8px;
+}
+.decision-card .card-header .card-num {
+  font-size: 0.75rem; font-weight: 700; color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.decision-card .card-header .card-title {
+  font-size: 1.05rem; font-weight: 700; color: var(--accent);
+}
+.decision-card .card-body { padding: 20px; }
+
+/* Scheme sub-blocks inside decision cards */
+.scheme-block {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin: 16px 0; overflow: hidden;
+}
+.scheme-block .scheme-label {
+  background: var(--surface); padding: 8px 14px;
+  font-size: 0.8rem; font-weight: 700; color: var(--text-secondary);
+  letter-spacing: 0.02em; border-bottom: 1px solid var(--border);
+}
+.scheme-block.chosen { border-color: var(--green); }
+.scheme-block.chosen .scheme-label {
+  background: var(--green-bg); color: var(--green);
+  border-bottom-color: var(--green);
+}
+.scheme-block .scheme-content { padding: 14px; }
+
+/* Decision verdict */
+.decision-verdict {
+  background: var(--green-bg); border: 1px solid var(--green);
+  border-radius: var(--radius); padding: 14px 18px; margin-top: 16px;
+}
+.decision-verdict .verdict-label {
+  font-size: 0.8rem; font-weight: 700; color: var(--green);
+  letter-spacing: 0.03em; margin-bottom: 4px;
+}
+
+.decision-verdict .verdict-text { font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.decision-verdict .verdict-reasons { color: var(--text-secondary); font-size: 0.9rem; }
+
+/* Decision logic matrix */
+.logic-matrix {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 16px 20px; margin: 16px 0;
+  font-family: "JetBrains Mono", "Fira Code", "SF Mono", "Consolas", monospace;
+  font-size: 0.825rem; white-space: pre; line-height: 1.6;
+  overflow-x: auto; color: var(--text-secondary);
+}
+
+/* ==================== CALLOUTS ==================== */
+.callout {
+  border-left: 4px solid var(--border); padding: 12px 16px;
+  margin: 16px 0; border-radius: 0 var(--radius) var(--radius) 0;
+  font-size: 0.9rem;
+}
+.callout.info  { border-left-color: var(--accent); background: var(--accent-light); }
+.callout.warn  { border-left-color: var(--amber); background: var(--amber-bg); }
+.callout.good  { border-left-color: var(--green); background: var(--green-bg); }
+
+/* ==================== TAG ==================== */
+.tag {
+  display: inline-block; font-size: 0.75rem; font-weight: 600; padding: 2px 8px;
+  border-radius: 3px; letter-spacing: 0.02em;
+}
+.tag-blue { background: var(--accent-light); color: var(--accent); }
+.tag-green { background: var(--green-bg); color: var(--green); }
+.tag-amber { background: var(--amber-bg); color: var(--amber); }
+.tag-red { background: var(--red-bg); color: var(--red); }
+.tag-muted { background: var(--surface); color: var(--text-muted); }
+
+/* ==================== PHASE BADGE ==================== */
+.phase-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 20px 0;
+}
+.phase-card {
+  border: 1px solid var(--border); border-radius: var(--radius); padding: 20px;
+}
+.phase-card.current { border-color: var(--accent); border-width: 2px; }
+.phase-card.future { border-color: var(--border); background: var(--surface); }
+.phase-card h4 { margin: 0 0 8px; font-size: 0.95rem; }
+.phase-card p { font-size: 0.85rem; color: var(--text-secondary); margin: 0; }
+
+/* ==================== FLOW ARROW ==================== */
+.flow-steps {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 4px;
+  margin: 16px 0; font-size: 0.85rem;
+}
+.flow-step {
+  background: var(--accent-light); color: var(--accent); padding: 4px 12px;
+  border-radius: var(--radius); font-weight: 600; white-space: nowrap;
+}
+.flow-arrow { color: var(--text-muted); font-size: 1.1rem; }
+
+/* ==================== FOOTER ==================== */
+.site-footer {
+  border-top: 2px solid var(--accent); padding: 32px 0;
+  font-size: 0.8rem; color: var(--text-muted);
+}
+
+/* ==================== PRINT ==================== */
+@media print {
+  .toc { position: static; }
+  .site-header { background: var(--accent) !important; -webkit-print-color-adjust: exact; }
+  .decision-card { break-inside: avoid; }
+  pre { -webkit-print-color-adjust: exact; }
+  body { font-size: 13px; }
+  .container { max-width: 100%; padding: 0 20px; }
+  @page { margin: 1.5cm; }
+}
+
+/* ==================== ANIMATION ==================== */
+/* Reduced motion: disable all animations */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .reveal { opacity: 1 !important; transform: none !important; }
+}
+
+/* Scroll Reveal */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s var(--ease-out), transform 0.6s var(--ease-out);
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger delay utility */
+.reveal-delay-1 { transition-delay: 0s; }
+.reveal-delay-2 { transition-delay: 0.08s; }
+.reveal-delay-3 { transition-delay: 0.16s; }
+.reveal-delay-4 { transition-delay: 0.24s; }
+.reveal-delay-5 { transition-delay: 0.32s; }
+
+/* Decision card entrance — slide + fade */
+.decision-card {
+  transition: box-shadow 0.25s var(--ease-out), border-color 0.25s var(--ease-out);
+}
+.decision-card:hover {
+  box-shadow: 0 2px 16px rgba(0,47,167,0.08);
+}
+
+/* Scheme block hover lift */
+.scheme-block {
+  transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+.scheme-block:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Table row reveal with gentle fade */
+tbody tr {
+  transition: background 0.2s var(--ease-out);
+}
+
+/* Code block subtle shimmer on hover — subtle, not distracting */
+pre {
+  transition: box-shadow 0.3s var(--ease-out);
+}
+pre:hover {
+  box-shadow: 0 2px 12px rgba(0,0,0,0.12);
+}
+
+/* Phase cards hover pop */
+.phase-card {
+  transition: transform 0.25s var(--spring), box-shadow 0.25s var(--ease-out);
+}
+.phase-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* Toc link subtle underline reveal */
+.toc ol li a {
+  position: relative;
+  transition: color 0.2s var(--ease-out);
+}
+.toc ol li a::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -2px;
+  width: 0; height: 1.5px;
+  background: var(--accent);
+  transition: width 0.25s var(--ease-out);
+}
+.toc ol li a:hover::after { width: 100%; }
+
+/* h2 accent bar pulse on hover */
+h2::before {
+  transition: height 0.3s var(--spring);
+}
+h2:hover::before { height: 1.4em; }
+
+/* Decision verdict subtle scale in */
+.decision-verdict {
+  transition: transform 0.3s var(--spring), box-shadow 0.3s var(--ease-out);
+}
+.decision-verdict:hover {
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(27,136,58,0.1);
+}
+
+/* Flow steps tag hover */
+.flow-step {
+  transition: transform 0.2s var(--spring), box-shadow 0.2s var(--ease-out), background 0.2s;
+}
+.flow-step:hover {
+  transform: translateY(-2px) scale(1.04);
+  box-shadow: 0 3px 10px rgba(0,47,167,0.15);
+  background: var(--accent);
+  color: #FFF;
+}
+
+/* Tag hover pop */
+.tag {
+  transition: transform 0.2s var(--spring);
+}
+.tag:hover { transform: scale(1.08); }
+
+/* Button-style hover on callouts */
+.callout {
+  transition: transform 0.25s var(--ease-out), box-shadow 0.25s var(--ease-out);
+}
+.callout:hover {
+  transform: translateX(3px);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+
+/* Header entrance animation */
+@keyframes headerSlideIn {
+  from { opacity: 0; transform: translateY(-20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.site-header h1 { animation: headerSlideIn 0.6s var(--ease-out) both; }
+.site-header .meta { animation: headerSlideIn 0.6s var(--ease-out) 0.1s both; }
+
+/* TOC entrance */
+@keyframes tocFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.toc { animation: tocFadeIn 0.5s var(--ease-out) 0.15s both; }
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .container { padding: 0 20px; }
+  .site-header { padding: 36px 0 32px; }
+  .site-header h1 { font-size: 1.4rem; }
+  h2 { font-size: 1.25rem; }
+  .phase-grid { grid-template-columns: 1fr; }
+  .toc ol { flex-direction: column; gap: 4px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==================== HEADER ==================== -->
+<header class="site-header">
+  <div class="container">
+    <h1>安全隐患治理审批流<br>设计决策全记录</h1>
+    <div class="meta">
+      <span>决策人：作者（已脱敏）</span>
+      <span>日期：2026-XX-XX</span>
+      <span>来源：某阶段需求摘要 + 代码分析 + 多轮设计讨论</span>
+    </div>
+  </div>
+</header>
+
+<!-- ==================== TOC ==================== -->
+<nav class="toc">
+  <div class="container">
+    <ol>
+      <li><a href="#s1">项目背景</a></li>
+      <li><a href="#s2">现状分析</a></li>
+      <li><a href="#s3">数据库改动详解</a></li>
+      <li><a href="#s4">后端改动概览</a></li>
+      <li><a href="#s5">前端改动概览</a></li>
+      <li><a href="#s6">设计决策逐条记录</a></li>
+      <li><a href="#s7">分期策略</a></li>
+      <li><a href="#s8">附录</a></li>
+      <li><a href="#s9">技术方案 QA</a></li>
+    </ol>
+  </div>
+</nav>
+
+<main class="container">
+
+<div class="callout warn" id="sanitization-note">
+  <strong>脱敏及后续增强说明</strong>：本文是从实习期间设计记录整理出的公开副本。企业、项目、组织、服务、类名、表名、接口路径、文件名、示例人员和作者账号均已泛化或替换；保留的 6 类业务流程与最多三级角色路由用于说明设计规模，不指向任何特定组织。并发、幂等和退回部分按公开 Demo 的增强口径校正：任务条件 CAS + 流程实例 <code>version/revision</code> CAS，<code>actionId</code> 唯一约束；公开 Demo 中字段名为 <code>operationId</code>。原始文件未随仓库发布，本文不构成生产源码。
+</div>
+
+<!-- ==================== 1. 项目背景 ==================== -->
+<section id="s1">
+<h2>项目背景</h2>
+
+<h3>业务背景</h3>
+<p>某大型制造企业安全生产管理平台（安全隐患治理模块）已完成某阶段需求编写。当前代码已实现：</p>
+<ul>
+  <li>安全隐患项目信息发起（<code>/api/v1/cases/add</code>）</li>
+  <li>分页查询（<code>/api/v1/cases/page</code>）</li>
+  <li>详情查看、编辑、删除</li>
+</ul>
+<p><strong>缺失核心能力</strong>：审批流。项目提交后无法流转到各级安全员审核、无法退回、无法指派。</p>
+
+<h3>需求来源</h3>
+<p>公开需求摘要定义了：</p>
+<ul>
+  <li><strong>6 种业务流程</strong>（按发起人身份区分）</li>
+  <li><strong>7 个状态阶段</strong></li>
+  <li><strong>多级审批路由</strong>（一线单元 → 业务部门 → 企业，最多三级）</li>
+  <li><strong>退回/直退机制</strong>（退回后重新提交直接回到被退回节点）</li>
+  <li><strong>指派/确认机制</strong>（上级指派给指定治理单元安全员）</li>
+  <li><strong>或签机制</strong>（多人处理任一处理即可）</li>
+  <li><strong>亮点项目审核</strong>（多级评星，本期不实现）</li>
+</ul>
+
+<div class="flow-steps">
+  <span class="flow-step">草稿</span><span class="flow-arrow">→</span>
+  <span class="flow-step">审批中</span><span class="flow-arrow">→</span>
+  <span class="flow-step">审核退回</span><span class="flow-arrow">→</span>
+  <span class="flow-step">治理中</span><span class="flow-arrow">→</span>
+  <span class="flow-step">验收中</span><span class="flow-arrow">→</span>
+  <span class="flow-step">验收退回</span><span class="flow-arrow">→</span>
+  <span class="flow-step">已验收</span>
+</div>
+
+<h3>参与角色</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>角色</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>业务部门员工（非安全员）</td><td>最基层，仅可上报</td></tr>
+    <tr><td>一线单元安全员</td><td>可上报（需/不需上级协助）、可审批</td></tr>
+    <tr><td>业务部门安全员</td><td>可上报、可指派、可审批</td></tr>
+    <tr><td>支持部门员工</td><td>仅可指派</td></tr>
+    <tr><td>企业级安全员</td><td>可指派、可审批</td></tr>
+    <tr><td>治理负责人</td><td>线下治理后填写治理信息</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ==================== 2. 现状分析 ==================== -->
+<section id="s2">
+<h2>现状分析</h2>
+
+<h3>现有代码架构</h3>
+<pre><code>项目结构 (Maven 多模块):
+├── case-common/     # 公共DTO、工具类、常量枚举
+├── case-core/       # 实体类、Mapper、VO
+├── case-service/    # 业务服务层
+├── case-web/        # Controller 层
+├── case-start/      # 启动模块
+└── case-web-ui/               # Vue 前端</code></pre>
+
+<h3>核心文件（本次涉及）</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>文件</th><th>路径</th><th>作用</th></tr></thead>
+  <tbody>
+    <tr><td>CaseInfo</td><td><code>case-core/.../entity/</code></td><td>主表实体</td></tr>
+    <tr><td>CaseInfoMapper</td><td><code>case-core/.../mapper/</code></td><td>主表 MyBatis-Plus Mapper</td></tr>
+    <tr><td>WorkflowService</td><td><code>case-service/.../impl/</code></td><td>核心业务逻辑</td></tr>
+    <tr><td>WorkflowController</td><td><code>case-web/.../controller/</code></td><td>REST API</td></tr>
+    <tr><td>RoleResolverService</td><td><code>case-service/.../impl/</code></td><td>公共服务（含用户信息、安全员查找）</td></tr>
+    <tr><td>OrgRoleCache</td><td><code>case-core/.../entity/</code></td><td>组织负责人表</td></tr>
+    <tr><td>TodoRecord</td><td><code>case-core/.../entity/</code></td><td>待办消息记录表</td></tr>
+    <tr><td>数据库初始化脚本 / 数据库升级脚本</td><td><code>/db/migrations/</code></td><td>数据库 DDL</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>现有数据表状态</h3>
+<p><strong><code>case_main</code></strong> 当前 24 个字段（公开示意）：</p>
+<pre><code>case_id (VARCHAR(64) PK)   -- UUID 主键
+status (INTEGER)              -- 0=草稿 1=已提交
+case_title (VARCHAR)          -- 课题名称
+case_no (VARCHAR)          -- 项目编号
+current_handler (VARCHAR)     -- 当前处理人
+current_level (INTEGER)       -- 0=草稿 1=一线单元 2=业务部门 3=企业
+revision (BIGINT)             -- 流程实例版本，API 也称 version，用于 CAS
+classification (INTEGER)      -- 治理分类
+background (TEXT)             -- 治理背景
+pics_before (TEXT)            -- 治理前照片
+video_before (VARCHAR(1024))  -- 治理前视频
+pics_after (TEXT)             -- 治理后照片
+video_after (VARCHAR(1024))   -- 治理后视频
+initiator_id (VARCHAR(64))    -- 发起人人员编号
+initiator_name (VARCHAR(64))  -- 发起人姓名
+initiator_org_id (VARCHAR(64))-- 发起人所属单位编号
+initiator_org_name (VARCHAR(64))-- 发起人所属单位名称
+target_org_id (VARCHAR(64))  -- 治理单位编号
+owner_id (VARCHAR(64)) -- 治理负责人人员编号
+owner_name (VARCHAR(64))-- 治理负责人人员姓名
+risk_score_before (VARCHAR(64))      -- 治理前风险值
+risk_score_after (VARCHAR(64))       -- 治理后风险值
+submit_time (TIMESTAMP)       -- 填报时间
+update_time (TIMESTAMP)       -- 更新时间</code></pre>
+
+<p><strong>旧系统 <code>LegacyWorkflowService</code></strong> 的审批逻辑：</p>
+<ul>
+  <li>通过人员标签服务查询安全员</li>
+  <li>通过组织目录服务查询父组织</li>
+  <li>审批记录用 JSON 字段 <code>approval_history</code> 存主表</li>
+  <li>进度不明确、查询困难</li>
+</ul>
+
+<h3>外部系统依赖</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>系统</th><th>用途</th><th>代码中调用方式</th></tr></thead>
+  <tbody>
+    <tr><td><strong>人员标签服务</strong></td><td>人员标签服务——查询拥有"安全员标签"的人</td><td><code>personTagClient.queryLabelOwners()</code></td></tr>
+    <tr><td><strong>组织目录服务</strong></td><td>组织服务——查询组织信息和父子关系</td><td><code>orgDirectoryClient.getOrgInfo()</code></td></tr>
+    <tr><td><strong>统一身份权限服务</strong></td><td>用户权限管理——查询用户信息</td><td><code>identityPermissionClient</code></td></tr>
+    <tr><td><strong>消息中心</strong></td><td>消息推送——待办消息推送（含企业 IM）</td><td><code>messageCenterClient</code></td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ==================== 3. 数据库改动详解 ==================== -->
+<section id="s3">
+<h2>数据库改动详解</h2>
+
+<h3>主表新增字段</h3>
+<pre><code><span class="sql-comment">-- case_main 新增字段</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> flow_type <span class="sql-keyword">INTEGER DEFAULT</span> 0;
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.case_main.flow_type <span class="sql-keyword">IS</span>
+    <span class="sql-string">'流程类型: 1=员工上报 2=一线单元安全员上报 3=业务部门安全员上报
+     4=业务部门安全员指派 5=支持部门员工指派 6=企业级安全员指派'</span>;
+
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> complete_deadline <span class="sql-keyword">DATE</span>;
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.case_main.complete_deadline <span class="sql-keyword">IS</span>
+    <span class="sql-string">'治理完成时限 (非必填，格式年月日)'</span>;
+
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> need_upper_help <span class="sql-keyword">INTEGER DEFAULT</span> 0;
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.case_main.need_upper_help <span class="sql-keyword">IS</span>
+    <span class="sql-string">'当前节点是否需要上级协助: 0=否 1=是'</span>;
+
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> safety_cost_flag <span class="sql-keyword">INTEGER DEFAULT</span> 0;
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.case_main.safety_cost_flag <span class="sql-keyword">IS</span>
+    <span class="sql-string">'是否涉及安全生产费用: 0=否 1=是'</span>;
+
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> safety_cost_case_id <span class="sql-keyword">VARCHAR</span>(64);
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.case_main.safety_cost_case_id <span class="sql-keyword">IS</span>
+    <span class="sql-string">'关联的安全生产费用项目ID'</span>;
+
+<span class="sql-comment">-- 预留字段（第三四层，本期仅建不实现逻辑）</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> governance_method <span class="sql-keyword">INTEGER</span>;   <span class="sql-comment">-- 治理方式</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> means <span class="sql-keyword">INTEGER</span>;           <span class="sql-comment">-- 手段</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> effect <span class="sql-keyword">TEXT</span>;            <span class="sql-comment">-- 治理后效果说明</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> ghxs <span class="sql-keyword">INTEGER</span>;           <span class="sql-comment">-- 固化形式</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> benefit <span class="sql-keyword">VARCHAR</span>(255);   <span class="sql-comment">-- 创造效益</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> cost_detail <span class="sql-keyword">VARCHAR</span>(500);<span class="sql-comment">-- 成本支出情况</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> person_list <span class="sql-keyword">VARCHAR</span>(500);<span class="sql-comment">-- 治理参与人</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> star_level <span class="sql-keyword">INTEGER DEFAULT</span> 0;     <span class="sql-comment">-- 亮点项目等级</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> star_status <span class="sql-keyword">INTEGER DEFAULT</span> 0;   <span class="sql-comment">-- 评星状态</span>
+<span class="sql-keyword">ALTER TABLE</span> public.case_main
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> promote_count <span class="sql-keyword">INTEGER DEFAULT</span> 0;  <span class="sql-comment">-- 推广次数</span></code></pre>
+
+<h3>新表：审批记录表</h3>
+<pre><code><span class="sql-keyword">CREATE TABLE IF NOT EXISTS</span> public.approval_event
+(
+    id               <span class="sql-keyword">VARCHAR</span>(64) <span class="sql-keyword">PRIMARY KEY DEFAULT</span> gen_random_uuid(),
+    case_id       <span class="sql-keyword">VARCHAR</span>(64) <span class="sql-keyword">NOT NULL</span>,
+    node_type        <span class="sql-keyword">INTEGER NOT NULL</span>,   <span class="sql-comment">-- 1=审批 2=确认指派 3=验收 4=亮点审核</span>
+    node_level       <span class="sql-keyword">INTEGER NOT NULL</span>,   <span class="sql-comment">-- 1=一线单元 2=业务部门 3=企业</span>
+    handler_id       <span class="sql-keyword">VARCHAR</span>(64),
+    handler_name     <span class="sql-keyword">VARCHAR</span>(64),
+    action           <span class="sql-keyword">INTEGER NOT NULL</span>,   <span class="sql-comment">-- 1=通过 2=退回 3=需上级协助 4=指派 5=确认</span>
+    reason           <span class="sql-keyword">TEXT</span>,                  <span class="sql-comment">-- 退回原因</span>
+    action_id        <span class="sql-keyword">VARCHAR</span>(64) <span class="sql-keyword">NOT NULL</span>, <span class="sql-comment">-- actionId，重试幂等键</span>
+    rejecting_node   <span class="sql-keyword">VARCHAR</span>(64),          <span class="sql-comment">-- rejectingNode，原拒绝节点</span>
+    target_node      <span class="sql-keyword">VARCHAR</span>(64),          <span class="sql-comment">-- targetNode，退回目标节点</span>
+    comment          <span class="sql-keyword">TEXT</span>,                  <span class="sql-comment">-- 审批意见</span>
+    action_time      <span class="sql-keyword">TIMESTAMP DEFAULT CURRENT_TIMESTAMP</span>
+);
+
+<span class="sql-keyword">CREATE INDEX IF NOT EXISTS</span> idx_approval_project
+    <span class="sql-keyword">ON</span> public.approval_event (case_id);
+<span class="sql-keyword">CREATE INDEX IF NOT EXISTS</span> idx_approval_handler
+    <span class="sql-keyword">ON</span> public.approval_event (handler_id);
+<span class="sql-keyword">CREATE UNIQUE INDEX IF NOT EXISTS</span> uq_approval_action
+    <span class="sql-keyword">ON</span> public.approval_event (case_id, action_id);</code></pre>
+
+<div class="callout info">
+  <strong>设计要点</strong>
+  <ul>
+    <li><strong>只 INSERT 不 UPDATE</strong>——完整审计轨迹，无并发冲突</li>
+    <li>退回事件同时记录 <code>rejectingNode</code> 与 <code>targetNode</code>，重提直达原拒绝节点</li>
+    <li><code>actionId</code> 唯一约束抵御客户端重试，事件日志仍保持只 INSERT 不 UPDATE</li>
+    <li><code>node_type</code> 区分审批/确认/验收/亮点——一个表覆盖全流程</li>
+    <li>索引覆盖 <code>case_id</code>（查项目轨迹）和 <code>handler_id</code>（查我的审批）</li>
+  </ul>
+</div>
+
+<h3>org_role_cache 表修改</h3>
+<pre><code><span class="sql-keyword">ALTER TABLE</span> public.org_role_cache
+    <span class="sql-keyword">ADD COLUMN IF NOT EXISTS</span> leader_level <span class="sql-keyword">INTEGER</span>;
+<span class="sql-keyword">COMMENT ON COLUMN</span> public.org_role_cache.leader_level <span class="sql-keyword">IS</span>
+<span class="sql-string">'安全员级别: 1=一线单元 2=业务部门 3=企业'</span>;</code></pre>
+<p>用于本地缓存各组织层级安全员，避免审批流实时依赖外部 人员标签服务。</p>
+
+<h3>todo_record 表修改</h3>
+<pre><code><span class="sql-comment">-- case_id 从 INTEGER 改为 VARCHAR(64)，适配新表 UUID 主键</span>
+<span class="sql-keyword">ALTER TABLE</span> public.todo_record
+    <span class="sql-keyword">ALTER COLUMN</span> case_id <span class="sql-keyword">TYPE VARCHAR</span>(64);</code></pre>
+
+<h3>项目编号格式变更</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>旧格式</th><th>新格式</th></tr></thead>
+  <tbody>
+    <tr><td><code>CASE20260608001</code></td><td><code>GCASE20260608001</code></td></tr>
+  </tbody>
+</table>
+</div>
+<p>改动位置：<code>WorkflowService.generateCaseNo()</code> 方法，在拼接结果前加 <code>"G"</code> 前缀。</p>
+</section>
+
+<!-- ==================== 4. 后端改动概览 ==================== -->
+<section id="s4">
+<h2>后端改动概览</h2>
+
+<h3>新增接口</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>方法</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/api/v1/cases/approve</code></td><td>审批通过（含需上级协助）</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/cases/reject</code></td><td>审批退回（含退回原因+退回节点）</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/cases/assign</code></td><td>指派给治理单位安全员</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/cases/confirmAssign</code></td><td>接收人确认指派</td></tr>
+    <tr><td>GET</td><td><code>/api/v1/cases/returnableNodes</code></td><td>获取可退回节点列表</td></tr>
+    <tr><td>GET</td><td><code>/api/v1/cases/approvalRecords</code></td><td>获取项目审批记录</td></tr>
+  </tbody>
+</table>
+</div>
+
+<h3>新增/修改 Service 方法</h3>
+<p><strong>WorkflowService</strong>：</p>
+<ul>
+  <li><code>determineFlowType()</code> —— 用户身份判定 → 决定 flow_type</li>
+  <li><code>approve()</code> —— 审批通过/需上级协助，含或签消除</li>
+  <li><code>reject()</code> —— 退回，含退回原因和目标节点</li>
+  <li><code>resubmit()</code> —— 审核退回后重新提交（直退）</li>
+  <li><code>assign()</code> —— 指派给指定部门安全员</li>
+  <li><code>confirmAssign()</code> —— 接收人确认指派</li>
+</ul>
+<p><strong>RoleResolverService</strong>：</p>
+<ul>
+  <li><code>resolveHandlers(orgIndexCode, targetLevel)</code> —— 查 org_role_cache → 未命中则调 人员标签服务 播种 → 返回处理人列表</li>
+</ul>
+<p><strong>新增定时任务</strong>：</p>
+<ul>
+  <li><code>RoleDirectorySyncTask</code> —— 周期性从 人员标签服务 同步安全员（默认 1 小时）</li>
+</ul>
+
+<h3>核心逻辑链路</h3>
+<pre><code>POST /api/v1/cases (提交): 判定身份 → flow_type → status=1, current_level=路由首节点
+  → revision=revision+1（实例 CAS）→ INSERT approval_event(actionId) → createTasks()
+
+POST /api/v1/cases/approve: 校验 current_handler → need_upper_help?
+  → YES: 任务条件 CAS + revision CAS，通过后 INSERT event(actionId, action=需上级协助)
+  → NO:  指定治理负责人, INSERT event(actionId, action=通过), 流转到治理阶段
+
+POST /api/v1/cases/reject: 校验 current_handler → 列出 returnableNodes
+  → INSERT event(actionId, rejectingNode=当前节点, targetNode=X, action=退回, reason=...)
+  → status=2, current_handler=退回节点处理人, invalidateTasks()
+
+resubmit: 目标节点修改后查最近退回事件 → status=1, current_level=rejectingNode
+  → 修改后直达原拒绝节点, createTasks()</code></pre>
+
+<h3>新增 Java 类</h3>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>类名</th><th>位置</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>ApprovalEvent</td><td><code>case-core/.../entity/</code></td><td>审批记录实体</td></tr>
+    <tr><td>ApprovalEventMapper</td><td><code>case-core/.../mapper/</code></td><td>审批记录 Mapper</td></tr>
+    <tr><td>ApproveCaseReq</td><td><code>case-core/.../vo/</code></td><td>审批通过请求 VO</td></tr>
+    <tr><td>RejectCaseReq</td><td><code>case-core/.../vo/</code></td><td>退回请求 VO</td></tr>
+    <tr><td>AssignCaseReq</td><td><code>case-core/.../vo/</code></td><td>指派请求 VO</td></tr>
+    <tr><td>ReturnableNodeResponse</td><td><code>case-core/.../vo/</code></td><td>可退回节点响应 VO</td></tr>
+  </tbody>
+</table>
+</div>
+</section>
+
+<!-- ==================== 5. 前端改动概览 ==================== -->
+<section id="s5">
+<h2>前端改动概览</h2>
+
+<h3>发起页（create-case.vue）</h3>
+<ul>
+  <li>不同身份展示不同操作按钮组合（提交/需上级协助/指派/保存草稿）</li>
+  <li>编号格式展示适配 <code>CASE</code> 前缀</li>
+</ul>
+
+<h3>审批操作面板（新组件）</h3>
+<ul>
+  <li>退回弹窗：退回原因(必填) + 退回节点选择（下拉，从接口获取）</li>
+  <li>通过弹窗：根据决策表动态显示字段（治理负责人/完成时限/安全生产费用）</li>
+  <li>指派弹窗：治理单位选择 + 完成时限 + 安全生产费用</li>
+  <li>确认指派弹窗：治理负责人选择 + 完成时限</li>
+</ul>
+
+<h3>审批记录时间线（新组件）</h3>
+<ul>
+  <li>按时间倒序展示项目审批历史</li>
+</ul>
+
+<h3>台账列表适配</h3>
+<ul>
+  <li>状态列适配新枚举（草稿/审批中/审核退回）</li>
+  <li>操作按钮按状态+身份差异化</li>
+  <li><code>current_handler</code> 多值展示</li>
+</ul>
+</section>
+
+<!-- ==================== 6. 设计决策逐条记录 ==================== -->
+<section id="s6">
+<h2>设计决策逐条记录</h2>
+<p>以下 13 条决策覆盖了审批流设计中的全部关键技术选择，每条包含背景、方案对比、Trade-Off 分析和最终决策。</p>
+
+<!-- 决策 1 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 1</span>
+    <span class="card-title">状态字段设计</span>
+  </div>
+  <div class="card-body">
+<p><strong>背景</strong>：需求定义了 7 个阶段，其中"审批中"内部分三层（一线单元→业务部门→企业），退回后需"直退"回被退回节点而非从头流转。</p>
+    <p><strong>问题</strong>：用单一 <code>status</code> 扁平枚举，还是用 <code>status</code> + <code>current_level</code> 组合？退回目标存主表还是从审批记录推导？</p>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 A: 扁平枚举</div>
+      <div class="scheme-content">
+        <p>单一 <code>status</code> 字段，枚举 15+ 个值。</p>
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>一字段，前端直接映射</td><td>状态值膨胀到 15+</td></tr>
+            <tr><td>无需组合逻辑</td><td>查询"所有审批中"要 <code>WHERE status IN (1,2,3)</code></td></tr>
+            <tr><td>直观</td><td>同 phase 不同 level 切换就是改 status，与 current_level 冗余</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 B: 复合字段 (status + current_level)</div>
+      <div class="scheme-content">
+        <p><code>status=1(审批中) + current_level=2</code> → 业务部门审核中</p>
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>查询"所有审批中" <code>WHERE status=1</code></td><td>退回时 current_level 语义变化</td></tr>
+            <tr><td>与现有表结构兼容</td><td>前端需组合两个字段展示文案</td></tr>
+            <tr><td>亮点审核多级可复用</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block chosen">
+<div class="scheme-label">✅ 方案 C: 复合字段 + 事件记录退回节点（最终选择）</div>
+      <div class="scheme-content">
+        <p>在方案 B 基础上不向主表写退回目标，退回事件同时记录 <code>rejecting_node</code>（rejectingNode）和 <code>target_node</code>（targetNode）；重提时按最近一条退回事件直达原拒绝节点。</p>
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>单一数据源——退回目标只在审批记录里</td><td>详情页需 JOIN 审批记录取退回目标</td></tr>
+            <tr><td>不存在双写不一致</td><td>列表展示 status=2 + current_handler 已够用</td></tr>
+            <tr><td>语义清晰：主表管状态，审批记录管历史</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="decision-verdict">
+      <div class="verdict-label">▼ 最终决策</div>
+      <div class="verdict-text">方案 C</div>
+      <ol class="verdict-reasons">
+        <li>列表展示不需要"退回目标级别"，<code>status=2 + current_handler=处理人 A</code> 已够用户理解</li>
+        <li>详情/处理页本来就要查审批记录，退回目标可以一并获取</li>
+        <li>避免主表和审批记录之间数据不一致的风险</li>
+        <li>退回关系作为事件事实保存，避免主表状态和历史目标双写不一致</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- 决策 2 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 2</span>
+    <span class="card-title">审批记录存储方式</span>
+  </div>
+  <div class="card-body">
+    <p><strong>背景</strong>：老系统用 JSON 字段 <code>approval_history</code> 存主表，存在查询困难、并发覆写等问题。</p>
+    <p><strong>问题</strong>：继续用 JSON 字段还是拆独立审批记录表？</p>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 A: JSON 字段 (延续旧系统)</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>不建新表，DDL 成本低</td><td>查询需全表扫描 JSON</td></tr>
+            <tr><td>读详情一次查询</td><td>统计需求不可做</td></tr>
+            <tr><td>团队熟悉</td><td>并发覆写风险高、代码拼 JSON 易出错</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block chosen">
+      <div class="scheme-label">✅ 方案 B: 独立审批记录表（最终选择）</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>查询灵活，全走索引</td><td>多一张表</td></tr>
+            <tr><td>支持并发——各自 INSERT 不互斥</td><td>详情多一次 DB 查询（非瓶颈）</td></tr>
+            <tr><td>扩展性好、统计友好</td><td></td></tr>
+          </tbody>
+        </table></div>
+        <p style="margin-top:12px;"><strong>记录粒度</strong>：</p>
+        <ul>
+          <li>粗粒度：每次操作 UPDATE 或新增。一个项目 3-7 条。</li>
+          <li><strong>细粒度（最终选择）</strong>：只 INSERT 不 UPDATE。一个项目 5-15 条。</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="decision-verdict">
+      <div class="verdict-label">▼ 最终决策</div>
+      <div class="verdict-text">方案 B + 细粒度 INSERT-only</div>
+      <ol class="verdict-reasons">
+        <li>JSON 方案在"退回后重新提交"场景有致命问题——要查找最近 <code>action=reject</code> 元素，JSON 操作极易出错</li>
+        <li>INSERT-only 无并发更新冲突</li>
+        <li>完整时间线，排查问题方便</li>
+        <li><code>rejectingNode</code>/<code>targetNode</code> 存审批事件 → 重提路由从事件事实推导（与决策 1 呼应）</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- 决策 3 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 3</span>
+    <span class="card-title">处理人（安全员）来源</span>
+  </div>
+  <div class="card-body">
+    <p><strong>背景</strong>：审批流转时需要确定每个节点的处理人。文档说"在组织管理页面配置安全员"，但组织管理页面在外部系统。</p>
+    <p><strong>问题</strong>：从外部系统实时查安全员，还是本地缓存？</p>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 A: 实时查 人员标签服务</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>已验证，旧系统跑通</td><td>每次流转都调外部接口，强依赖外部可用性</td></tr>
+            <tr><td>安全员变动实时生效</td><td>人员标签服务 超时或异常 → 审批流直接报错</td></tr>
+            <tr><td>开发量最小</td><td>标签服务稳定性未知</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block chosen">
+      <div class="scheme-label">✅ 方案 B: org_role_cache 本地缓存 + 按需播种 + 定时同步（最终选择）</div>
+      <div class="scheme-content">
+        <pre><code>审批流转 → 查 org_role_cache
+  ├─ 命中 → 直接使用
+  └─ 未命中 → 调 人员标签服务 查 → INSERT org_role_cache → 使用
+
+定时任务（1h）→ 全量刷新 org_role_cache</code></pre>
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>审批流不依赖外部系统可用性</td><td>需开发同步逻辑</td></tr>
+            <tr><td>第一次使用时自动播种</td><td>安全员变动有延迟（同步周期）</td></tr>
+            <tr><td>可加手动触发同步接口应急</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 C: 实时查 人员标签服务 + Redis 短缓存</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>比 B 开发量小</td><td>引入 Redis 依赖</td></tr>
+            <tr><td></td><td>缓存失效时仍可能打不可用服务</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="decision-verdict">
+      <div class="verdict-label">▼ 最终决策</div>
+      <div class="verdict-text">方案 B</div>
+      <p class="verdict-reasons"><strong>决策逻辑（无需了解 人员标签服务 稳定性）</strong>：</p>
+    </div>
+
+    <div class="logic-matrix">                  人员标签服务 稳定           人员标签服务 不稳定
+方案 A          完美              审批流瘫痪
+方案 B          稳定可靠           稳定可靠</div>
+
+    <div class="callout warn">
+      方案 B 在 人员标签服务 稳定时多付出的代价是常数（一张表 + 一个定时任务），避免的风险是无上限的（审批流瘫痪）。这是一笔<strong>天然不对称的 Trade-Off</strong>——用可控的工程成本消除不可控的外部风险。
+    </div>
+  </div>
+</div>
+
+<!-- 决策 4 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 4</span>
+    <span class="card-title">或签机制实现方式</span>
+  </div>
+  <div class="card-body">
+    <p><strong>背景</strong>：需求定义"一个节点有多个处理人时，采用或签方式"——任意一人处理即可。</p>
+    <p><strong>问题</strong>：用什么机制来管理"其他人待办自动消除"？</p>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 A: 仅靠 current_handler + 业务代码</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody><tr><td>简单</td><td>清理逻辑散落在业务代码</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block">
+      <div class="scheme-label">方案 B: 独立待办表</div>
+      <div class="scheme-content">
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody><tr><td>可追溯</td><td>多一张表</td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="scheme-block chosen">
+      <div class="scheme-label">✅ 方案 C: current_handler + todo_record（最终选择）</div>
+      <div class="scheme-content">
+        <p>复用已有 <code>todo_record</code> 表：</p>
+        <pre><code>流转 → current_handler = "A,B,C" → 每人 INSERT todo_record
+某人处理 → 自己的 = done; 其他人同节点 = -100(已失效)</code></pre>
+        <div class="table-wrap"><table class="tradeoff">
+          <thead><tr><th>优点</th><th>缺点</th></tr></thead>
+          <tbody>
+            <tr><td>复用已有表</td><td>case_id 需改为 VARCHAR(64)</td></tr>
+            <tr><td>职责分离：current_handler / todo_record</td><td></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <div class="decision-verdict">
+      <div class="verdict-label">▼ 最终决策</div>
+      <div class="verdict-text">方案 C</div>
+      <ol class="verdict-reasons">
+        <li><code>todo_record</code> 表已存在，责任明确</li>
+        <li>current_handler 管"谁是处理人"，todo_record 管"谁的待办"，各司其职</li>
+        <li>改动小：仅需 <code>case_id</code> 类型适配</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- 决策 5 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 5</span>
+    <span class="card-title">分期范围</span>
+  </div>
+  <div class="card-body">
+    <p><strong>背景</strong>：需求文档涉及的字段和功能横跨发起、审批、治理、验收、亮点、台账、导出等多个阶段。</p>
+    <p><strong>问题</strong>：本期做哪些、后续做哪些？</p>
+
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>层级</th><th>内容</th><th>不做会怎样</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-red">第一层</span></td>
+          <td>审批流骨架：flow_type、审批记录表、状态机、路由逻辑、待办管理</td>
+          <td><strong>审批流无法运行</strong></td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-amber">第二层</span></td>
+          <td>审批节点操作面板：安全生产费用、需上级协助、完成时限、治理负责人</td>
+          <td>审批人操作流程断裂——点"通过"弹出对话框缺字段</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-muted">第三层</span></td>
+          <td>治理阶段：治理方式、手段、固化形式、成本支出、转办</td>
+          <td>审批通过后的环节，不阻塞审批流上线</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-muted">第四层</span></td>
+          <td>验收+亮点+台账增强：亮点级别、评星、推广、批量导出</td>
+          <td>流程最后一环，可独立迭代</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <div class="decision-verdict">
+      <div class="verdict-label">▼ 最终决策</div>
+<div class="verdict-text">第一层 + 第二层本期做，第三四层后续设计再做</div>
+      <ol class="verdict-reasons">
+        <li>第一二层组合 = 一套完整的审批体验：发起 → 流转 → 退回 → 直退</li>
+        <li>第二层的字段是审批决策动作的直接延伸</li>
+        <li>第三四层是审批通过之后的独立阶段，可独立迭代</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- 决策 6-13 简要 -->
+<div class="decision-card">
+  <div class="card-header">
+    <span class="card-num">DECISION 6 — 13</span>
+    <span class="card-title">其他决策汇总</span>
+  </div>
+  <div class="card-body">
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>#</th><th>决策点</th><th>选择</th><th>简述理由</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><span class="tag tag-blue">6</span></td>
+          <td>项目编号格式</td>
+          <td><code>CASE+日期+序号</code></td>
+          <td>文档要求，在 <code>generateProjectNo()</code> 加 <code>"G"</code> 前缀，改动极小</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">7</span></td>
+          <td>发起人身份判定</td>
+          <td>先 mock 用户</td>
+          <td>参考 <code>findCurrentUser()</code> 模式，后续对接 org_role_cache</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">8</span></td>
+          <td>风险选择数据源</td>
+          <td>暂缓</td>
+          <td>区域权限数据源未确认，后续再做</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">9</span></td>
+          <td>"需上级协助" Action</td>
+          <td>统一为一个 action</td>
+          <td>流转结果一样（<code>current_level+1</code>），<code>node_type</code> 已区分上下文</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">10</span></td>
+          <td>可退回节点列表</td>
+          <td>从审批记录推导</td>
+          <td>查 <code>action IN (通过,需上级协助)</code> 的历史节点即得</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">11</span></td>
+          <td>企业 IM消息推送</td>
+          <td>推迟</td>
+          <td>本期仅做 Web 端待办，企微推送后续对接 消息中心</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">12</span></td>
+          <td>弹窗字段矩阵</td>
+          <td>按矩阵表实现</td>
+<td>不同身份+操作 → 不同弹出字段组合，见技术设计文档</td>
+        </tr>
+        <tr>
+          <td><span class="tag tag-blue">13</span></td>
+          <td>验收阶段处理人</td>
+          <td>取审批实际处理人</td>
+          <td>从 <code>approval_event</code> 中 <code>action=通过</code> 的 <code>handler_id</code> 取，非重新查安全员</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ==================== 7. 分期策略 ==================== -->
+<section id="s7">
+<h2>分期策略</h2>
+
+<h3>本期（phase-one-workflow）</h3>
+<div class="ascii-diagram">┌─────────────────────────────────────────────┐
+│         本次设计范围                          │
+│                                               │
+│  ┌──────┐  提交   ┌─────────┐                │
+│  │ 草稿 │────────▶│  审批中  │                │
+│  └──────┘        │(多级流转) │                │
+│     ▲            └────┬─────┘                │
+│     │                 │                      │
+│     │    ┌────────────┼──────────────┐       │
+│     │    │ 通过        │ 需上级协助     │ 退回  │
+│     │    ▼            ▼              ▼       │
+│     │  ┌────────┐  ┌────────┐   ┌────────┐  │
+│     │  │指定负责人│  │上级审批 │   │ 退回节点 │  │
+│     │  └────────┘  └────────┘   └────────┘  │
+│     │                  │              │       │
+│     │                  │ 直退         │       │
+│     │                  ▼              │       │
+│     │              ┌──────────┐      │       │
+│     │              │ 本期截止  │◄─────┘       │
+│     │              └──────────┘              │
+│     └─────────────────────────────────────────┘
+│                                               │
+│  本期实现: 审批流骨架 + 审批节点操作面板        │
+│  不包括: 治理阶段 / 验收 / 亮点审核 / 推广      │
+└─────────────────────────────────────────────┘</div>
+
+<div class="phase-grid">
+  <div class="phase-card current">
+    <h4><span class="tag tag-green">本期</span> phase-one-workflow</h4>
+    <p>审批流骨架（状态机+表结构+路由）+ 审批节点操作面板（通过/退回/需上级协助/指派）</p>
+  </div>
+  <div class="phase-card future">
+    <h4><span class="tag tag-muted">后续</span> 治理阶段</h4>
+    <p>治理负责人填写治理信息、转办</p>
+  </div>
+  <div class="phase-card future">
+    <h4><span class="tag tag-muted">后续</span> 验收阶段</h4>
+    <p>发起人/安全员验收、多级验收、亮点项目审核</p>
+  </div>
+  <div class="phase-card future">
+    <h4><span class="tag tag-muted">后续</span> 台账增强</h4>
+    <p>批量导出（图片/视频）、推广/领用</p>
+  </div>
+</div>
+</section>
+
+<!-- ==================== 8. 附录 ==================== -->
+<section id="s8">
+<h2>附录：参考文件清单</h2>
+<div class="table-wrap">
+<table>
+  <thead><tr><th>文件</th><th>路径</th><th>说明</th></tr></thead>
+  <tbody>
+    <tr><td>需求说明书</td><td><code>公开需求摘要</code></td><td>某阶段完整需求</td></tr>
+    <tr><td>数据库初始化脚本</td><td><code>数据库初始化脚本</code></td><td>新表 DDL</td></tr>
+    <tr><td>数据库升级脚本</td><td><code>数据库升级脚本</code></td><td>增量变更</td></tr>
+    <tr><td>主表实体</td><td><code>case-core/.../entity/CaseInfo.java</code></td><td>24 个字段（含 revision）</td></tr>
+    <tr><td>核心服务</td><td><code>case-service/.../impl/WorkflowService.java</code></td><td>CRUD 实现</td></tr>
+    <tr><td>Controller</td><td><code>case-web/.../controller/WorkflowController.java</code></td><td>REST API</td></tr>
+    <tr><td>设计提案</td><td><code>变更提案文档</code></td><td>变更提案</td></tr>
+    <tr><td>技术设计</td><td><code>技术设计文档</code></td><td>技术设计</td></tr>
+    <tr><td>功能规格</td><td><code>功能规格文档</code></td><td>7 个功能规格</td></tr>
+    <tr><td>实施任务</td><td><code>实施任务清单</code></td><td>45 项实施任务</td></tr>
+  </tbody>
+</table>
+</div></section>
+
+<!-- ==================== 9. 技术方案 QA ==================== -->
+<section id="s9">
+<h2>技术方案 QA</h2>
+<p>面向：团队 Review / Mentor 提问预期 / 后续接手者快速理解。覆盖流程机制、数据设计、架构韧性、扩展性、运维边界共 30 个问答。</p>
+
+<h3>核心流程</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q1</span><span class="card-title">项目状态是怎么流转的？</span></div>
+  <div class="card-body">
+<pre><code>status=0(草稿)        current_level=0
+    │  提交
+    ▼
+status=1(审批中)      current_level=1(一线单元)
+    │  通过/需上级协助
+    ▼
+status=1(审批中)      current_level=2(业务部门)
+    │  通过/需上级协助
+    ▼
+status=1(审批中)      current_level=3(企业)
+    │  通过 + 指定治理负责人
+    ▼
+status=3(治理中)      current_level=0     ← 本期截止，后续实现
+
+ 退回路径（任意审批节点可触发）：
+ status=1(审批中)  →  退回  →  status=2(审核退回)
+     事件记录 rejectingNode + targetNode
+     targetNode 修改后重新提交 → status=1，current_level=rejectingNode（直达原拒绝节点）</code></pre>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q2</span><span class="card-title">怎么判断项目当前在哪个状态、哪个审批节点？</span></div>
+  <div class="card-body">
+    <p>组合两个字段：<code>status</code> 决定大阶段（审批中/退回/治理中/…），<code>current_level</code> 决定审批中的具体层级（一线单元/业务部门/企业）。流程实例的 <code>revision</code>（API 语义为 <code>version</code>）用于并发 CAS。</p>
+<pre><code><span class="sql-comment">-- 所有审批中的项目</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> case_main <span class="sql-keyword">WHERE</span> status = 1;
+
+<span class="sql-comment">-- 所有在业务部门审批中的项目</span>
+<span class="sql-keyword">SELECT</span> * <span class="sql-keyword">FROM</span> case_main <span class="sql-keyword">WHERE</span> status = 1 <span class="sql-keyword">AND</span> current_level = 2;</code></pre>
+    <p>退回状态时 <code>current_level</code> 无意义，前端展示靠 <code>status=2</code> + <code>current_handler</code> 即可。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q3</span><span class="card-title">退回后重新提交，怎么实现"直退"？</span></div>
+  <div class="card-body">
+    <ol>
+      <li>审批人点退回 → <code>approval_event</code> INSERT 一条带唯一 <code>actionId</code> 的 <code>action=退回</code> 事件，同时记录 <code>rejectingNode</code> 和 <code>targetNode</code></li>
+      <li>主表 <code>status=2</code>，<code>current_handler</code> 改为退回目标节点的处理人</li>
+      <li>退回目标节点修改后重新提交 → 查 <code>approval_event</code> 最近一条退回事件的 <code>rejectingNode</code> → <code>status=1</code>，<code>current_level=rejectingNode</code></li>
+      <li>直接回到原拒绝节点，跳过中间层级；重复提交由 <code>actionId</code> 唯一约束幂等处理</li>
+    </ol>
+    <div class="callout info">退回目标只存在审批事件里，主表不存；<code>rejectingNode</code> 记录拒绝发生处，<code>targetNode</code> 记录退回修改节点，修改后重提直达原拒绝节点，避免双写不一致。</div>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q4</span><span class="card-title">怎么确定每个节点的处理人是谁？</span></div>
+  <div class="card-body">
+    <p>核心原则：<strong>审批流不依赖外部系统实时可用性</strong>。<code>org_role_cache</code> 表是本地缓存层，人员标签服务 只做播种和定时刷新。</p>
+<pre><code>审批流转需要处理人
+      │
+      ▼
+查 org_role_cache 表（leader_level + org_id）
+      │
+  ┌───┴───┐
+  │ 查到？  │
+  ├───┬───┤
+  │YES│NO │
+  │   │   ▼
+  │   │ 人员标签服务查安全员
+  │   │   ├─ 查到 → INSERT org_role_cache（播种）→ 使用
+  │   │   └─ 未查到 → 报错"该组织未配置安全员"
+  │   │
+  ▼   ▼
+返回处理人列表 → 生成待办
+
+定时任务（1h）：人员标签服务 → 全量刷新 org_role_cache</code></pre>
+  </div>
+</div>
+
+<h3>审批机制</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q5</span><span class="card-title">或签机制具体是怎么工作的？</span></div>
+  <div class="card-body">
+<pre><code>流转到节点 → current_handler = "处理人 A,处理人 B,处理人 C"
+           → 每人 INSERT 一条 todo_record（status=0）
+
+处理人 A处理   → 自己的待办 → done
+           → 处理人 B、处理人 D同节点待办 → 批量 UPDATE status=-100（已失效）
+           → current_handler → 下一节点处理人
+
+处理人 B回来   → 待办已 -100，不可见</code></pre>
+    <p>任意一人处理即可，同节点其他人的待办自动消除。<code>todo_record</code> 复用已有表。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q6</span><span class="card-title">"需上级协助"和"通过"在行为上有什么区别？</span></div>
+  <div class="card-body">
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>通过</th><th>需上级协助</th></tr></thead>
+      <tbody>
+        <tr><td>审批意见</td><td>同意</td><td>同意</td></tr>
+        <tr><td>流转方向</td><td>指定治理负责人 → 治理阶段</td><td>上级审批节点</td></tr>
+        <tr><td>current_level</td><td>不变（已到最终节点）</td><td>+1</td></tr>
+        <tr><td>出现场景</td><td>所有审批节点</td><td>非最高级审批节点</td></tr>
+      </tbody>
+    </table></div>
+    <p>统一用 <code>action=需上级协助</code> 记录在审批记录表。<code>node_type</code> 已有上下文。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q7</span><span class="card-title">审批通过后项目去了哪里？本期做到什么程度？</span></div>
+  <div class="card-body">
+    <p>审批人在最后一级审批点"通过" → 弹窗指定治理负责人 + 完成时限 → <strong>本期截止</strong>。后续阶段设计实现 <code>status=3(治理中)</code> 及后续阶段。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q8</span><span class="card-title">退回时用户可以选哪些退回节点？</span></div>
+  <div class="card-body">
+    <p>从 <code>approval_event</code> 查询该项目所有 <code>action IN (通过, 需上级协助)</code> 的历史记录 → 去重 → 就是可退回节点列表。不另建配置表。</p>
+    <p>示例（业务部门员工上报流程）：</p>
+<pre><code>当前节点 = 企业级安全员
+历史审批节点 = [一线单元安全员, 业务部门安全员]
+可退回节点  = [一线单元安全员, 业务部门安全员, 填报人]  ← 填报人始终可选</code></pre>
+  </div>
+</div>
+
+<h3>流程类型</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q9</span><span class="card-title">指派流程和上报流程的区别是什么？</span></div>
+  <div class="card-body">
+    <div class="table-wrap"><table>
+      <thead><tr><th></th><th>上报流程</th><th>指派流程</th></tr></thead>
+      <tbody>
+        <tr><td>发起人选</td><td>不选治理单位</td><td>必选治理单位</td></tr>
+        <tr><td>流转方向</td><td>发起人 → 本级/上级安全员逐级审批</td><td>发起人 → 治理单位安全员确认</td></tr>
+        <tr><td>典型场景</td><td>本单位自己治理</td><td>跨部门协调治理</td></tr>
+        <tr><td>flow_type</td><td>1/2/3</td><td>4/5/6</td></tr>
+      </tbody>
+    </table></div>
+    <p>指派流程中，发起人不是审批链的一环——提交后直接到目标单位安全员确认。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q10</span><span class="card-title">发起人身份是怎么判定的？为什么用 mock？</span></div>
+  <div class="card-body">
+    <p>沿用 <code>findCurrentUser()</code> 的配置模式，用 mock 用户配置判断身份。等 <code>org_role_cache</code> 表数据完善 + 定时同步跑通后，查当前用户是否在 <code>org_role_cache</code> 中 + <code>leader_level</code> 是多少 → 判定身份。人员标签服务的稳定性未知，不在登录路径上依赖它。</p>
+  </div>
+</div>
+
+<h3>数据设计</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q11</span><span class="card-title">数据库为什么不用 JSON 字段存审批记录？</span></div>
+  <div class="card-body">
+    <ul>
+      <li>查询"我审批过的所有项目"要全表扫描 JSON → 走不了索引</li>
+      <li>统计"本月退回率"几乎不可做</li>
+      <li>并发场景下整字段覆写 → 数据丢失风险</li>
+      <li>退回后重新提交时找最近退回记录的 <code>returnToLevel</code> → JSON 操作极易出错</li>
+    </ul>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q12</span><span class="card-title">审批记录表为什么只 INSERT 不 UPDATE？</span></div>
+  <div class="card-body">
+    <ul>
+      <li><strong>完整审计轨迹</strong>：每次操作都是一条新记录，永远不改历史</li>
+      <li><strong>无并发冲突</strong>：多个人审批时各自 INSERT</li>
+      <li><strong>时间线自然形成</strong>：按 <code>action_time</code> 排序就是完整链路</li>
+      <li><strong>退回后重交不丢历史</strong>：新旧审批记录共存，可追溯"第一次通过是谁、第二次通过是谁"</li>
+    </ul>
+  </div>
+</div>
+
+<h3>事务与并发</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q13</span><span class="card-title">审批操作涉及多表写入，怎么保证一致性？</span></div>
+  <div class="card-body">
+    <p>一次审批操作至少涉及：</p>
+<pre><code><span class="sql-keyword">UPDATE</span> case_main (status, current_level, current_handler, revision=revision+1)
+  <span class="sql-keyword">WHERE</span> case_id = ? <span class="sql-keyword">AND</span> revision = ?   <span class="sql-comment">-- 流程实例 version/revision CAS</span>
+<span class="sql-keyword">INSERT</span> approval_event (actionId, action=通过)   <span class="sql-comment">-- (case_id, actionId) 唯一</span>
+<span class="sql-keyword">UPDATE</span> todo_record (同节点其他人标记 -100)   <span class="sql-comment">-- 任务条件 CAS</span>
+<span class="sql-keyword">INSERT</span> todo_record (下一节点处理人 × N)</code></pre>
+    <p><strong>所有操作在同一事务中</strong>。<code>@Transactional(rollbackFor = Exception.class)</code>，任何一步失败全部回滚；事件日志追加写入，主表和任务表用条件更新保护并发。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q14</span><span class="card-title">或签时两个人同时点"通过"怎么办？</span></div>
+  <div class="card-body">
+    <p><strong>双层乐观并发控制</strong>：</p>
+<pre><code><span class="sql-keyword">UPDATE</span> todo_record
+<span class="sql-keyword">SET</span> status = 'done'
+<span class="sql-keyword">WHERE</span> case_id = ? <span class="sql-keyword">AND</span> node_id = ? <span class="sql-keyword">AND</span> assignee_id = ? <span class="sql-keyword">AND</span> status = 0; <span class="sql-comment">-- 任务条件 CAS</span>
+
+<span class="sql-keyword">UPDATE</span> case_main
+<span class="sql-keyword">SET</span> status = ?, current_handler = ?, revision = revision + 1
+<span class="sql-keyword">WHERE</span> case_id = ? <span class="sql-keyword">AND</span> status = 1 <span class="sql-keyword">AND</span> revision = ?;</code></pre>
+    <p>如果处理人 A 先完成，处理人 B 的任务条件或流程实例 revision CAS 影响行数为 0，事务回滚，前端提示"该审批已被他人处理"。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q15</span><span class="card-title">用户连续点两下"通过"，会重复写两条审批记录吗？</span></div>
+  <div class="card-body">
+    <p><strong>不会</strong>。服务端先按 <code>(case_id, actionId)</code> 唯一约束去重：重试同一个 actionId 返回第一次结果；随后任务条件 CAS 与流程实例 revision CAS 防止并发迁移。公开 Demo 对应字段名为 <code>operationId</code>。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q16</span><span class="card-title">项目编号并发怎么办？</span></div>
+  <div class="card-body">
+    <p><strong>兜底方案</strong>：数据库 <code>case_no</code> 加唯一索引。INSERT 冲突时 Java 层捕获 <code>DuplicateKeyException</code>，重新生成编号重试（最多 3 次）。</p>
+<pre><code><span class="sql-keyword">CREATE UNIQUE INDEX IF NOT EXISTS</span> idx_case_no
+    <span class="sql-keyword">ON</span> public.case_main (case_no);</code></pre>
+  </div>
+</div>
+
+<h3>容错与边界</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q17</span><span class="card-title">如果查不到安全员怎么办？</span></div>
+  <div class="card-body">
+    <p><strong>显式报错，不静默跳过</strong>。返回明确错误信息："组织 [XXX] 未配置 [一线单元级] 安全员，请联系管理员"。这比"提交成功但不知道去了哪里"好得多。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q18</span><span class="card-title">通知推送失败了，审批流还走不走？</span></div>
+  <div class="card-body">
+    <p><strong>审批流照走，推送是旁路</strong>。</p>
+<pre><code>主路径：改 status + 写审批记录 + 更新 current_handler  →  必须成功
+旁路：  调 消息中心 推送待办消息 → 失败记日志 + 告警，不阻塞流转</code></pre>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q19</span><span class="card-title">删除项目时审批记录怎么办？</span></div>
+  <div class="card-body">
+    <p>审批记录<strong>保留</strong>，不级联删除。审批记录是独立审计数据，不因项目删除而消失。如果确实需要清理，DBA 手动操作，代码不做级联删除。</p>
+  </div>
+</div>
+
+<h3>架构与风险</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q20</span><span class="card-title">如果 人员标签服务挂了，审批流还能用吗？</span></div>
+  <div class="card-body">
+    <p><strong>能</strong>。只要 <code>org_role_cache</code> 表里有数据，审批流转完全不走外部调用。</p>
+    <div class="table-wrap"><table>
+      <thead><tr><th>场景</th><th>人员标签服务 挂了的影响</th></tr></thead>
+      <tbody>
+        <tr><td>审批流转（org_role_cache 命中）</td><td>无影响</td></tr>
+        <tr><td>审批流转（org_role_cache 未命中、首次播种）</td><td>阻塞，显式报错</td></tr>
+        <tr><td>定时同步任务</td><td>本次同步跳过，下一周期重试</td></tr>
+      </tbody>
+    </table></div>
+    <div class="callout warn">冷启动时（表全空 + 人员标签服务 挂了）确实会阻塞，建议部署脚本里加一条初始同步，启动时立刻跑一次。</div>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q21</span><span class="card-title">怎么回滚？数据表结构变更了怎么办？</span></div>
+  <div class="card-body">
+    <p><strong>只回滚代码，不回滚数据库</strong>。</p>
+    <ul>
+      <li>新字段全部是 <code>ADD COLUMN IF NOT EXISTS</code> + 有 DEFAULT 值 → 老代码忽略这些字段</li>
+      <li>新表 <code>approval_event</code> 老代码不读写 → 不影响</li>
+      <li>旧代码状态只用到 status=0/1 → 新状态值不会出现在旧请求里</li>
+    </ul>
+    <p>没有破坏性 DDL（改类型 / 删列），代码回滚到上一个版本即可。</p>
+  </div>
+</div>
+
+<h3>数据生命周期</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q22</span><span class="card-title">老数据迁移怎么处理？</span></div>
+  <div class="card-body">
+    <p>现有 <code>case_main</code> 表里可能有 status=0/1 的存量数据，<code>flow_type</code> 是新字段，老数据为 NULL 或默认值 0。</p>
+<pre><code><span class="sql-keyword">UPDATE</span> case_main
+<span class="sql-keyword">SET</span> flow_type = 1   <span class="sql-comment">-- 默认按"员工上报"处理</span>
+<span class="sql-keyword">WHERE</span> flow_type <span class="sql-keyword">IS NULL OR</span> flow_type = 0;</code></pre>
+    <p>同时在 page 查询里兼容 <code>flow_type=0</code>（视为不筛选）。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q23</span><span class="card-title">审批时间线按什么顺序展示？</span></div>
+  <div class="card-body">
+    <p>按 <code>action_time ASC</code> 排序。每条记录自带 <code>node_type + node_level + action</code>，INSERT-only 的表本身就是完整链路，不需要额外设计"轮次"或"阶段"字段。</p>
+  </div>
+</div>
+
+<h3>权限边界</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q24</span><span class="card-title">安全员能不能看到其他部门安全员审批的项目？</span></div>
+  <div class="card-body">
+    <p>当前 page 查询逻辑：非草稿全部可见。这意味着部门 A 的安全员能看到部门 B 的审批中项目。如果业务上不允许跨部门查看，需在 page 查询新增 <code>initiatorOrgId</code> 过滤。这属于业务需求决策，不在本次技术设计范围内，但需提及避免误解。</p>
+  </div>
+</div>
+
+<h3>上线运维</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q25</span><span class="card-title">定时同步任务第一次什么时候跑？</span></div>
+  <div class="card-body">
+    <p><strong>建议部署脚本里加一条初始同步</strong>——启动时立刻跑一次，而不是等 1 小时后的定时触发：</p>
+<pre><code>启动顺序：
+1. 执行数据库升级脚本（建表/加字段）
+2. 执行老数据迁移 UPDATE
+3. 启动 Spring Boot
+4. 立即触发一次 RoleDirectorySyncTask（全量同步 人员标签服务 → org_role_cache）
+5. 后续按 cron 表达式周期执行</code></pre>
+    <p>冷启动时表是空的，提前跑一次避免第一个用户提交审批时触发按需播种的延迟。</p>
+  </div>
+</div>
+
+<h3>扩展性</h3>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q26</span><span class="card-title">如果以后增加了"集团级"审批（第 4 级），系统怎么改？</span></div>
+  <div class="card-body">
+    <ol>
+      <li><code>current_level</code> 新增枚举值 4</li>
+      <li><code>org_role_cache.leader_level</code> 新增值 4</li>
+      <li><code>flow_type</code> 路由链加一级</li>
+      <li><code>approval_event.node_level</code> 新增值 4</li>
+    </ol>
+    <p><strong>不涉及表结构变更</strong>——所有关键字段都是 INTEGER 枚举，扩展加值即可。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q27</span><span class="card-title">如果某个流程的审批链变了，系统怎么改？</span></div>
+  <div class="card-body">
+    <p>修改 <code>flow_type</code> 对应的路由逻辑（一个方法），不涉及数据迁移。历史项目不受影响——审批记录已完整记录实际走过的节点。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q28</span><span class="card-title">如果安全员数据源从 人员标签服务 换成了其他系统，系统怎么改？</span></div>
+  <div class="card-body">
+    <p>只改 <code>RoleResolverService.resolveHandlers()</code> 里的外部调用实现 + <code>RoleDirectorySyncTask</code> 的同步源。<code>org_role_cache</code> 表作为统一缓存层隔离了外部变化，上层审批流转代码完全无感。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q29</span><span class="card-title">如果状态阶段要增减，怎么改？</span></div>
+  <div class="card-body">
+    <p><code>status</code> 枚举扩展（如 <code>status=7</code> 新增"集团退回"），不涉及表结构变更。或者复用现有 <code>status=2</code>（审核退回）+ 审批事件 <code>targetNode</code> 区分退回级别。推荐后者。</p>
+  </div>
+</div>
+
+<div class="decision-card">
+  <div class="card-header"><span class="card-num">Q30</span><span class="card-title">如果以后要改成会签（所有人都要处理），怎么改？</span></div>
+  <div class="card-body">
+    <p><code>todo_record</code> 的消除逻辑从"同节点全部标记 -100"改为"仅标记自己的 → done，等所有人都 done → 统一流转"。<code>current_handler</code> 和 <code>approval_event</code> 不需要改。</p>
+  </div>
+</div>
+</section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="container">
+    <p>安全隐患治理审批流 · 设计决策全记录 · 作者（已脱敏） · 2026-XX-XX</p>
+    <p>某大型制造企业安全生产管理平台 · 安全隐患治理模块 · 某阶段迭代</p>
+  </div>
+</footer>
+
+<script>
+(function() {
+  /* Scroll-spy: highlight active TOC link */
+  const tocLinks = document.querySelectorAll('.toc ol li a');
+  const sections = [];
+  tocLinks.forEach(a => {
+    const href = a.getAttribute('href');
+    if (href && href.startsWith('#')) {
+      const el = document.querySelector(href);
+      if (el) sections.push({ el, link: a });
+    }
+  });
+
+  function updateActiveLink() {
+    let current = sections[0];
+    const scrollY = window.scrollY + 120;
+    for (let i = 0; i < sections.length; i++) {
+      if (sections[i].el.offsetTop <= scrollY) current = sections[i];
+    }
+    tocLinks.forEach(a => a.style.fontWeight = '');
+    if (current) current.link.style.fontWeight = '700';
+  }
+
+  /* Scroll reveal with intersection observer */
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  /* Reveal decision cards, scheme blocks, tables, callouts, phase cards */
+  document.querySelectorAll('.decision-card, .scheme-block, .callout, .phase-card, .ascii-diagram').forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+
+  /* Section h2 reveal */
+  document.querySelectorAll('h2').forEach(el => {
+    el.classList.add('reveal');
+    observer.observe(el);
+  });
+
+  window.addEventListener('scroll', updateActiveLink, { passive: true });
+  updateActiveLink();
+})();
+</script>
+
+</body>
+</html>
