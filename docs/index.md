@@ -10,7 +10,7 @@ hero:
   actions:
     - theme: brand
       text: 浏览文章
-      link: /2026/lightweight-approval-workflow
+      link: /2026/handling-out-of-order-mq-messages
     - theme: alt
       text: GitHub
       link: https://github.com/Quashy

@@ -8,6 +8,7 @@
 
 | 日期 | 标题 |
 |------|------|
+| 2026-08-31 | [消息先到，不代表事情先发生：MQ 乱序下的事件时间与状态回放](https://quashy.github.io/2026/handling-out-of-order-mq-messages) |
 | 2026-08-21 | [从流程图到状态机：我怎样落地一个审批需求](https://quashy.github.io/2026/lightweight-approval-workflow) |
 | 2026-08-18 | [一次登录，到底发生了什么：从 Session 到 SSO、OAuth 2.0、OIDC 与 SAML](https://quashy.github.io/2026/understanding-sso-auth-protocols) |
 | 2026-07-19 | [从全拼到双拼：我为什么做了「并击」](https://quashy.github.io/2026/from-quanpin-to-shuangpin) |
