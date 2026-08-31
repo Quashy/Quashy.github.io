@@ -126,7 +126,10 @@ export default withMermaid(
    * 源文件使用发布日期前缀，便于在 IDE 文件树中按发布时间排序；
    * 构建时移除日期前缀，保持已发布文章的 URL 与不蒜子 page_pv 统计键稳定。
    */
-  rewrites: (id) => id.replace(/^(\d{4})[\\/]\d{4}-\d{2}-\d{2}-(.+\.md)$/, '$1/$2'),
+  rewrites: (id) =>
+    id
+      .replace(/^internship-summary[\\/]index\.md$/, 'hk/index.md')
+      .replace(/^(\d{4})[\\/]\d{4}-\d{2}-\d{2}-(.+\.md)$/, '$1/$2'),
 
   // ========== Head 元数据 ==========
   /**
@@ -316,6 +319,13 @@ export default withMermaid(
           { text: '如何参与开源项目', link: '/2026/how-to-contribute-to-open-source' },
           { text: '人生设计：探索你的现在', link: '/2026/designing-your-life' },
           { text: 'OpenCode GO 接入 CC Switch 指南', link: '/2026/opencode-go-ccw' }
+        ]
+      },
+      {
+        text: '实习总结',
+        collapsed: false,
+        items: [
+          { text: '首页', link: '/hk/' }
         ]
       },
     ],

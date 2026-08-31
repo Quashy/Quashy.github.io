@@ -16,6 +16,10 @@
 | 2026-07-14 | [人生设计：探索你的现在](https://quashy.github.io/2026/designing-your-life) |
 | 2026-06-30 | [OpenCode GO 接入 CC Switch 指南](https://quashy.github.io/2026/opencode-go-ccw) |
 
+## 专题索引
+
+- [实习总结](https://quashy.github.io/hk/)：汇总实习期间沉淀的项目实践、业务建模和工程问题复盘。
+
 ## 工程结构
 
 ```
@@ -30,6 +34,7 @@ personalspace
 │   │  └─ theme         # 样式和主题
 │   ├─ index.md         # 博客首页
 │   ├─ 2026             # 按年份存放博文
+│   ├─ internship-summary # 实习总结索引
 │   └─ public           # 静态资源（图片等）
 ├─ .gitignore           # Git 提交忽略配置
 ├─ AGENTS.md            # AI 工具协作与文章发布规范
