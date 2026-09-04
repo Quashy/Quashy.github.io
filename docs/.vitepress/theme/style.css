@@ -87,35 +87,12 @@
 }
 
 /**
- * Component: Home
+ * Page: Engineering Profile Home
  * -------------------------------------------------------------------------- */
 
-:root {
-  --vp-home-hero-name-color: transparent;
-  --vp-home-hero-name-background: -webkit-linear-gradient(
-    120deg,
-    #bd34fe 30%,
-    #41d1ff
-  );
-
-  --vp-home-hero-image-background-image: linear-gradient(
-    -45deg,
-    #bd34fe 50%,
-    #47caff 50%
-  );
-  --vp-home-hero-image-filter: blur(44px);
-}
-
-@media (min-width: 640px) {
-  :root {
-    --vp-home-hero-image-filter: blur(56px);
-  }
-}
-
-@media (min-width: 960px) {
-  :root {
-    --vp-home-hero-image-filter: blur(68px);
-  }
+/* 自定义首页自行管理末尾留白，覆盖默认 VPHome 的固定 margin。 */
+.engineering-profile-home .VPHome {
+  margin-bottom: 0;
 }
 
 /**
@@ -147,72 +124,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-/**
- * Component: Site Stats（首页访客统计卡片）
- * -------------------------------------------------------------------------- */
-/* 让不蒜子容器在脚本加载前也可见，配合占位符「--」消除布局抖动（CLS） */
-.site-stats [id^="busuanzi_container_"] {
-  display: inline !important;
-}
-.site-stats {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  /* gap 窄屏收紧、宽屏放宽，避免 375px 拥挤 */
-  gap: clamp(12px, 4vw, 24px);
-  /* 卡片宽度刚好包住内容并水平居中，避免占满首页主内容宽度显得空旷 */
-  width: fit-content;
-  max-width: 100%;
-  margin: 48px auto 0;
-  /* 与上方 features 卡片统一视觉：padding 24px */
-  padding: 24px;
-  /* 关键：边框色与背景色同为 --vp-c-bg-soft，呈"无边框软块"质感，
-     与上方 features 卡片（border + background 同色）完全一致 */
-  border: 1px solid var(--vp-c-bg-soft);
-  border-radius: 12px;
-  background-color: var(--vp-c-bg-soft);
-  /* 复刻 features 的 0.25s 微交互 */
-  transition: border-color 0.25s, background-color 0.25s;
-}
-/* 对齐 features 链接态：hover 时边框变品牌色 */
-.site-stats:hover {
-  border-color: var(--vp-c-brand-1);
-}
-.site-stats-item {
-  display: flex;
-  align-items: baseline;
-  gap: 6px;
-}
-.site-stats-label {
-  /* 卡片背景比页面背景略浅，次要文字升一级用 --vp-c-text-1 保证 4.5:1 对比度 */
-  color: var(--vp-c-text-1);
-  font-size: 14px;
-}
-.site-stats-value {
-  color: var(--vp-c-brand-1);
-  font-size: 22px;
-  font-weight: 600;
-  /* 等宽数字：统计数值位数变化时不抖动 */
-  font-variant-numeric: tabular-nums;
-}
-.site-stats-unit {
-  color: var(--vp-c-text-1);
-  /* 单位字号与标签一致，13px 偏小且属辅助标注，统一到 14px */
-  font-size: 14px;
-}
-.site-stats-divider {
-  width: 1px;
-  height: 24px;
-  /* 弱对比分隔线，融入软块质感，不抢视觉焦点 */
-  background-color: var(--vp-c-divider);
-}
-/* 极窄屏隐藏分隔线，靠 gap 即可分隔两组数据 */
-@media (max-width: 480px) {
-  .site-stats-divider {
-    display: none;
-  }
 }
 
 /**

@@ -1,45 +1,185 @@
-<script setup lang="ts">
-/**
- * 站点级访客统计组件（首页 features 下方）
- *
- * 沿用不蒜子 span id 约定，脚本加载后会自动把数字写入 id="busuanzi_value_*" 的 span：
- * - busuanzi_container_site_uv / busuanzi_value_site_uv：总访客 UV
- * - busuanzi_container_site_pv / busuanzi_value_site_pv：总访问量 PV
- *
- * 无障碍设计：
- * - 顶层 aria-label 提供可读上下文（视觉 label/value 分离，屏幕阅读器需完整句式）
- * - 数值容器 aria-live="polite"：不蒜子脚本异步写入后播报新值
- * - 数值未就绪时最内层 span 显示占位符「--」，消除布局抖动（CLS）
- */
-</script>
-
 <template>
-  <div class="site-stats" aria-label="站点访客统计">
-    <div class="site-stats-item">
-      <span class="site-stats-label">总访客</span>
-      <span
-        id="busuanzi_container_site_uv"
-        class="site-stats-value"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <!-- 占位符 --：脚本未就绪时显示，加载成功后被覆盖 -->
-        <span id="busuanzi_value_site_uv">--</span>
-      </span>
-      <span class="site-stats-unit">UV</span>
+  <section class="site-stats" aria-labelledby="site-stats-title">
+    <div class="site-stats-intro">
+      <p class="site-stats-meta" aria-hidden="true">03 / READING LOG</p>
+      <h2 id="site-stats-title">本站足迹</h2>
+      <p>每一次阅读，都是这份长期记录的一部分。</p>
     </div>
-    <div class="site-stats-divider" aria-hidden="true"></div>
-    <div class="site-stats-item">
-      <span class="site-stats-label">总访问量</span>
-      <span
-        id="busuanzi_container_site_pv"
-        class="site-stats-value"
-        aria-live="polite"
-        aria-atomic="true"
-      >
-        <span id="busuanzi_value_site_pv">--</span>
-      </span>
-      <span class="site-stats-unit">PV</span>
-    </div>
-  </div>
+
+    <dl class="site-stats-list">
+      <div class="site-stats-item">
+        <dt>独立访客</dt>
+        <dd>
+          <span
+            id="busuanzi_container_site_uv"
+            class="site-stats-value"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span class="site-stats-sr-only">独立访客：</span>
+            <!-- 占位符 --：脚本未就绪时显示，加载成功后被覆盖 -->
+            <span id="busuanzi_value_site_uv">--</span>
+            <span class="site-stats-unit">UV</span>
+          </span>
+        </dd>
+      </div>
+
+      <div class="site-stats-item">
+        <dt>累计访问</dt>
+        <dd>
+          <span
+            id="busuanzi_container_site_pv"
+            class="site-stats-value"
+            role="status"
+            aria-live="polite"
+            aria-atomic="true"
+          >
+            <span class="site-stats-sr-only">累计访问：</span>
+            <span id="busuanzi_value_site_pv">--</span>
+            <span class="site-stats-unit">PV</span>
+          </span>
+        </dd>
+      </div>
+    </dl>
+  </section>
 </template>
+
+<style scoped>
+.site-stats [id^='busuanzi_container_'] {
+  display: inline-flex !important;
+}
+
+.site-stats {
+  display: grid;
+  gap: clamp(2.5rem, 7vw, 6rem);
+  align-items: end;
+}
+
+.site-stats-intro {
+  max-width: 36rem;
+}
+
+.site-stats-meta {
+  margin: 0 0 0.625rem;
+  color: var(--vp-c-text-3);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  line-height: 1.5;
+  letter-spacing: 0.08em;
+}
+
+.site-stats h2 {
+  margin: 0;
+  color: var(--vp-c-text-1);
+  font-family: 'Source Han Serif SC', 'Noto Serif CJK SC', 'Songti SC', STSong,
+    serif;
+  font-size: clamp(2rem, 4vw, 3.25rem);
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.035em;
+}
+
+.site-stats-intro > p:last-child {
+  margin: 0.75rem 0 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+.site-stats-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-width: 0;
+  margin: 0;
+}
+
+.site-stats-item {
+  min-width: 0;
+  padding-inline: clamp(1rem, 3vw, 2rem);
+}
+
+.site-stats-item:first-child {
+  padding-inline-start: 0;
+  border-inline-end: 1px solid var(--vp-c-divider);
+}
+
+.site-stats-item:last-child {
+  padding-inline-end: 0;
+}
+
+.site-stats-item dt {
+  margin: 0;
+  color: var(--vp-c-text-2);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.site-stats-item dd {
+  margin: 0.4rem 0 0;
+}
+
+.site-stats-value {
+  align-items: baseline;
+  gap: 0.35rem;
+  color: var(--vp-c-text-1);
+  font-size: clamp(1.5rem, 5vw, 2.5rem);
+  font-weight: 650;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.site-stats-unit {
+  color: var(--vp-c-text-2);
+  font-family: var(--vp-font-family-mono);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+
+.site-stats-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 30rem) {
+  .site-stats-item {
+    padding-inline: 0.75rem;
+  }
+
+  .site-stats-item:first-child {
+    padding-inline-start: 0;
+  }
+
+  .site-stats-item:last-child {
+    padding-inline-end: 0;
+  }
+
+  .site-stats-value {
+    gap: 0.25rem;
+    font-size: clamp(1.25rem, 6vw, 1.375rem);
+  }
+}
+
+@media (min-width: 48rem) {
+  .site-stats {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .site-stats-list {
+    min-width: min(100%, 25rem);
+  }
+}
+</style>
