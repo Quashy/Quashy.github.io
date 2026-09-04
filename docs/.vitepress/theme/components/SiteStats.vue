@@ -169,7 +169,7 @@
 
   .site-stats-value {
     gap: 0.25rem;
-    font-size: clamp(1.25rem, 6vw, 1.375rem);
+    font-size: clamp(1.125rem, 5.5vw, 1.375rem);
   }
 }
 

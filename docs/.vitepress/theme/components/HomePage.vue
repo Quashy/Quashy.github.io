@@ -100,22 +100,54 @@ const workflowSteps = [
                 <marker
                   id="workflow-arrow-wide"
                   viewBox="0 0 8 8"
-                  refX="7"
+                  refX="4"
                   refY="4"
-                  markerWidth="6"
-                  markerHeight="6"
+                  markerWidth="6.5"
+                  markerHeight="6.5"
                   orient="auto"
                 >
-                  <path d="M0 0 8 4 0 8Z" fill="currentColor" stroke="none" />
+                  <path class="workflow-marker-shape" d="M0 0 8 4 0 8Z" />
                 </marker>
               </defs>
 
-              <path d="M157 75H243" marker-end="url(#workflow-arrow-wide)" />
-              <path d="M357 75H443" marker-end="url(#workflow-arrow-wide)" />
-              <path d="M500 123V177" marker-end="url(#workflow-arrow-wide)" />
-              <path d="M443 225H357" marker-end="url(#workflow-arrow-wide)" />
-              <path d="M243 225H157" marker-end="url(#workflow-arrow-wide)" />
-              <path d="M43 225H12V75H43" marker-end="url(#workflow-arrow-wide)" />
+              <path class="workflow-track" d="M100 75H300" />
+              <path class="workflow-track" d="M300 75H500" />
+              <path class="workflow-track" d="M500 75V225" />
+              <path class="workflow-track" d="M500 225H300" />
+              <path class="workflow-track" d="M300 225H100" />
+              <path class="workflow-track" d="M100 225H12V75H100" />
+
+              <path
+                class="workflow-flow"
+                d="M100 75H200H300"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
+              <path
+                class="workflow-flow"
+                d="M300 75H400H500"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
+              <path
+                class="workflow-flow"
+                d="M500 75V150V225"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
+              <path
+                class="workflow-flow"
+                d="M500 225H400H300"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
+              <path
+                class="workflow-flow"
+                d="M300 225H200H100"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
+              <path class="workflow-flow" d="M100 225H12V75H100" />
+              <path
+                class="workflow-arrow-guide"
+                d="M12 185V150V115"
+                marker-mid="url(#workflow-arrow-wide)"
+              />
             </svg>
 
             <svg
@@ -129,24 +161,56 @@ const workflowSteps = [
                 <marker
                   id="workflow-arrow-compact"
                   viewBox="0 0 8 8"
-                  refX="7"
+                  refX="4"
                   refY="4"
-                  markerWidth="6"
-                  markerHeight="6"
+                  markerWidth="6.5"
+                  markerHeight="6.5"
                   orient="auto"
                 >
-                  <path d="M0 0 8 4 0 8Z" fill="currentColor" stroke="none" />
+                  <path class="workflow-marker-shape" d="M0 0 8 4 0 8Z" />
                 </marker>
               </defs>
 
-              <path d="M132 50H168" marker-end="url(#workflow-arrow-compact)" />
-              <path d="M225 82V118" marker-end="url(#workflow-arrow-compact)" />
-              <path d="M168 150H132" marker-end="url(#workflow-arrow-compact)" />
-              <path d="M75 182V218" marker-end="url(#workflow-arrow-compact)" />
-              <path d="M132 250H168" marker-end="url(#workflow-arrow-compact)" />
+              <path class="workflow-track" d="M75 50H225" />
+              <path class="workflow-track" d="M225 50V150" />
+              <path class="workflow-track" d="M225 150H75" />
+              <path class="workflow-track" d="M75 150V250" />
+              <path class="workflow-track" d="M75 250H225" />
               <path
-                d="M282 250H292V10H8V50H18"
-                marker-end="url(#workflow-arrow-compact)"
+                class="workflow-track"
+                d="M225 250H292V8H8V50H75"
+              />
+
+              <path
+                class="workflow-flow"
+                d="M75 50H150H225"
+                marker-mid="url(#workflow-arrow-compact)"
+              />
+              <path
+                class="workflow-flow"
+                d="M225 50V100V150"
+                marker-mid="url(#workflow-arrow-compact)"
+              />
+              <path
+                class="workflow-flow"
+                d="M225 150H150H75"
+                marker-mid="url(#workflow-arrow-compact)"
+              />
+              <path
+                class="workflow-flow"
+                d="M75 150V200V250"
+                marker-mid="url(#workflow-arrow-compact)"
+              />
+              <path
+                class="workflow-flow"
+                d="M75 250H150H225"
+                marker-mid="url(#workflow-arrow-compact)"
+              />
+              <path class="workflow-flow" d="M225 250H292V8H8V50H75" />
+              <path
+                class="workflow-arrow-guide"
+                d="M292 200V150V100"
+                marker-mid="url(#workflow-arrow-compact)"
               />
             </svg>
 
@@ -226,7 +290,8 @@ const workflowSteps = [
   --home-accent-soft: rgb(36 87 214 / 10%);
   --home-title-highlight: rgb(36 87 214 / 18%);
   --home-accent-on: #ffffff;
-  --home-flow-line: rgb(36 87 214 / 52%);
+  --home-flow-track: rgb(36 87 214 / 28%);
+  --home-flow-active: #2457d6;
   --home-grid-line: rgb(36 87 214 / 8%);
   --home-panel-shadow:
     0 0 0 1px rgb(23 32 51 / 8%),
@@ -242,13 +307,14 @@ const workflowSteps = [
   --home-accent-soft: rgb(143 176 255 / 12%);
   --home-title-highlight: rgb(143 176 255 / 24%);
   --home-accent-on: #15171c;
-  --home-flow-line: rgb(143 176 255 / 55%);
+  --home-flow-track: rgb(143 176 255 / 32%);
+  --home-flow-active: #8fb0ff;
   --home-grid-line: rgb(143 176 255 / 8%);
   --home-panel-shadow: 0 0 0 1px rgb(255 255 255 / 10%);
 }
 
 .home-shell {
-  width: min(100%, 1280px);
+  width: min(100%, 1360px);
   margin-inline: auto;
   padding-inline: clamp(1.25rem, 5vw, 4rem);
 }
@@ -328,6 +394,7 @@ const workflowSteps = [
 
 .home-intro p {
   margin: 0;
+  text-wrap: pretty;
 }
 
 .home-actions {
@@ -443,6 +510,7 @@ const workflowSteps = [
   color: var(--vp-c-text-2);
   font-size: 0.9375rem;
   line-height: 1.6;
+  text-wrap: pretty;
 }
 
 .workflow-diagram {
@@ -461,18 +529,37 @@ const workflowSteps = [
 
 .workflow-path {
   z-index: 0;
-  color: var(--home-flow-line);
+  color: var(--home-flow-active);
   overflow: visible;
   pointer-events: none;
 }
 
-.workflow-path path {
+.workflow-path .workflow-track,
+.workflow-path .workflow-flow,
+.workflow-path .workflow-arrow-guide {
   fill: none;
-  stroke: currentColor;
-  stroke-width: 1.5;
+  stroke-width: 2;
   stroke-linecap: round;
   stroke-linejoin: round;
   vector-effect: non-scaling-stroke;
+}
+
+.workflow-path .workflow-track {
+  stroke: var(--home-flow-track);
+}
+
+.workflow-path .workflow-flow {
+  stroke: var(--home-flow-active);
+  stroke-dasharray: 7 11;
+}
+
+.workflow-path .workflow-arrow-guide {
+  stroke: transparent;
+}
+
+.workflow-path .workflow-marker-shape {
+  fill: var(--home-flow-active);
+  stroke: none;
 }
 
 .workflow-path-wide {
@@ -639,13 +726,10 @@ const workflowSteps = [
   padding-block: clamp(4.5rem, 9vw, 7rem);
 }
 
-@media (min-width: 62rem) {
-  .home-hero-layout {
-    grid-template-columns: minmax(0, 1.16fr) minmax(26rem, 0.84fr);
-  }
-
+@media (min-width: 48rem) {
   .workflow-diagram {
-    min-height: 19rem;
+    min-height: 19.5rem;
+    margin-top: 1.25rem;
   }
 
   .workflow-path-wide {
@@ -690,6 +774,21 @@ const workflowSteps = [
     grid-column: 1;
     grid-row: 2;
   }
+}
+
+@media (min-width: 62rem) {
+  .home-hero {
+    padding-block: clamp(4rem, 6vw, 5.5rem);
+  }
+
+  .home-hero-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(29rem, 0.9fr);
+    gap: clamp(3rem, 5vw, 4.5rem);
+  }
+
+  .workflow-diagram {
+    min-height: 21.5rem;
+  }
 
   .current-practice-layout {
     grid-template-columns: minmax(7rem, 0.22fr) minmax(0, 1fr) auto;
@@ -721,6 +820,35 @@ const workflowSteps = [
 }
 
 @media (prefers-reduced-motion: no-preference) {
+  .home-identity,
+  .home-hero h1,
+  .home-intro,
+  .home-actions,
+  .workflow {
+    animation: home-enter 550ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  .home-hero h1 {
+    animation-delay: 80ms;
+  }
+
+  .home-intro,
+  .workflow {
+    animation-delay: 160ms;
+  }
+
+  .home-actions {
+    animation-delay: 240ms;
+  }
+
+  .workflow-flow {
+    animation: workflow-stream 1.15s linear 4;
+  }
+
+  .workflow:hover .workflow-flow {
+    animation: workflow-stream-replay 900ms linear 2;
+  }
+
   .home-action {
     transition-property: color, background-color, box-shadow, transform;
     transition-duration: 150ms;
@@ -733,20 +861,60 @@ const workflowSteps = [
     transition-timing-function: ease-out;
   }
 
+  .home-action svg,
+  .current-practice-link svg {
+    transition: transform 150ms ease-out;
+  }
+
+  .home-action-primary:is(:hover, :focus-visible) svg {
+    transform: translateX(0.2rem);
+  }
+
+  .home-action-secondary:is(:hover, :focus-visible) svg,
+  .current-practice-link:is(:hover, :focus-visible) svg {
+    transform: translate(0.14rem, -0.14rem);
+  }
+
   .home-action:active,
   .current-practice-link:active {
     transform: scale(0.96);
   }
 }
 
+@keyframes home-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes workflow-stream {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
+@keyframes workflow-stream-replay {
+  to {
+    stroke-dashoffset: -18;
+  }
+}
+
 @media (prefers-contrast: more) {
   .home-profile {
-    --home-flow-line: #2457d6;
+    --home-flow-track: #2457d6;
+    --home-flow-active: #2457d6;
     --home-grid-line: rgb(36 87 214 / 18%);
   }
 
   :global(.dark .home-profile) {
-    --home-flow-line: #b3c8ff;
+    --home-flow-track: #b3c8ff;
+    --home-flow-active: #b3c8ff;
     --home-grid-line: rgb(179 200 255 / 18%);
   }
 }
@@ -757,8 +925,13 @@ const workflowSteps = [
     outline-color: Highlight;
   }
 
-  .workflow-path {
-    color: CanvasText;
+  .workflow-path .workflow-track,
+  .workflow-path .workflow-flow {
+    stroke: CanvasText;
+  }
+
+  .workflow-path .workflow-marker-shape {
+    fill: CanvasText;
   }
 }
 </style>
