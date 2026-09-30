@@ -845,10 +845,6 @@ const workflowSteps = [
     animation: workflow-stream 1.15s linear 4;
   }
 
-  .workflow:hover .workflow-flow {
-    animation: workflow-stream-replay 900ms linear 2;
-  }
-
   .home-action {
     transition-property: color, background-color, box-shadow, transform;
     transition-duration: 150ms;
@@ -894,12 +890,6 @@ const workflowSteps = [
 }
 
 @keyframes workflow-stream {
-  to {
-    stroke-dashoffset: -18;
-  }
-}
-
-@keyframes workflow-stream-replay {
   to {
     stroke-dashoffset: -18;
   }
