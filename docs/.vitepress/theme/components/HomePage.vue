@@ -34,9 +34,9 @@ const workflowSteps = [
           <nav class="home-actions" aria-label="首页主要入口">
             <a
               class="home-action home-action-primary"
-              href="/2026/handling-out-of-order-mq-messages"
+              href="/2026/from-if-else-to-rbac-abac-acl"
             >
-              <span>阅读 MQ 乱序复盘</span>
+              <span>阅读权限设计文章</span>
               <svg
                 viewBox="0 0 24 24"
                 width="18"

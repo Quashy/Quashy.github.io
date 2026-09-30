@@ -291,7 +291,7 @@ export default withMermaid(
      */
     nav: [
       { text: '首页', link: '/' },
-      { text: '文章', link: '/2026/handling-out-of-order-mq-messages' },
+      { text: '文章', link: '/2026/from-if-else-to-rbac-abac-acl' },
       { text: '并击', link: 'https://quashy.github.io/bingji-shuangpin/' }
     ],
 
@@ -312,6 +312,7 @@ export default withMermaid(
         text: '2026',
         collapsed: true,
         items: [
+          { text: '权限不是一串 if：从硬编码到 RBAC、ABAC 与 ACL', link: '/2026/from-if-else-to-rbac-abac-acl' },
           { text: '消息先到，不代表事情先发生：MQ 乱序下的事件时间与状态回放', link: '/2026/handling-out-of-order-mq-messages' },
           { text: '从流程图到状态机：我怎样落地一个审批需求', link: '/2026/lightweight-approval-workflow' },
           { text: '一次登录，到底发生了什么', link: '/2026/understanding-sso-auth-protocols' },
