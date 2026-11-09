@@ -1,21 +1,38 @@
 // https://vitepress.dev/guide/custom-theme
-import { h, nextTick } from 'vue'
+import { defineComponent, h, nextTick } from 'vue'
 import type { Theme } from 'vitepress'
 import DefaultTheme from 'vitepress/theme'
 import mediumZoom from 'medium-zoom'
+import 'lenis/dist/lenis.css'
 import './style.css'
 import PageView from './components/PageView.vue'
 import { triggerBusuanzi } from './composables/useBusuanzi'
+import { useSiteMotion } from './composables/useSiteMotion'
+
+const MotionLayout = defineComponent({
+  name: 'MotionLayout',
+  setup() {
+    useSiteMotion()
+    return () => h(DefaultTheme.Layout, null, {
+      // 文章正文底部：本文阅读量（组件内部按路径判断是否渲染）
+      'doc-after': () => h(PageView),
+    })
+  },
+})
 
 /**
  * 初始化 medium-zoom 图片缩放
  * 选择器 '.main img' 覆盖文章正文中所有图片（含 VitePress 内容容器与首页 hero 区），
  * 背景色使用 VitePress CSS 变量以跟随暗/亮模式
- * 注意：先 detach 已有实例，避免 SPA 路由切换时重复绑定同一图片
+ * 复用实例并重新绑定当前页图片，避免 SPA 切页时累积全局监听器。
  */
 let zoom: ReturnType<typeof mediumZoom> | null = null
 const initZoom = () => {
-  if (zoom) zoom.detach()
+  if (zoom) {
+    zoom.detach()
+    zoom.attach('.main img')
+    return
+  }
   zoom = mediumZoom('.main img', {
     background: 'var(--vp-c-bg)',
     margin: 0, // 图片撑满视口，不留边缘空隙
@@ -41,13 +58,7 @@ const initSidebarTooltips = () => {
 
 export default {
   extends: DefaultTheme,
-  Layout: () => {
-    return h(DefaultTheme.Layout, null, {
-      // https://vitepress.dev/guide/extending-default-theme#layout-slots
-      // 文章正文底部：本文阅读量（组件内部按路径判断是否渲染）
-      'doc-after': () => h(PageView),
-    })
-  },
+  Layout: MotionLayout,
   enhanceApp({ app, router, siteData }) {
     if (typeof window !== 'undefined') {
       // 延迟 200ms，确保首屏文章图片与侧边栏均已渲染。

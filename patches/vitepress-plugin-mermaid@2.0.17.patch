@@ -1,0 +1,24 @@
+diff --git a/dist/Mermaid.vue b/dist/Mermaid.vue
+index 1632d9856878c0abf12a4a9ec6936f6e643cd9b3..9d70a99462bec60a43e78dd5a27ba6629f4ca6f4 100644
+--- a/dist/Mermaid.vue
++++ b/dist/Mermaid.vue
+@@ -42,8 +42,17 @@ onMounted(async () => {
+   let settings = await import("virtual:mermaid-config");
+   if (settings?.default) pluginSettings.value = settings.default;
+ 
+-  mut = new MutationObserver(async () => await renderChart());
+-  mut.observe(document.documentElement, { attributes: true });
++  let isDark = document.documentElement.classList.contains("dark");
++  mut = new MutationObserver(async () => {
++    const nextIsDark = document.documentElement.classList.contains("dark");
++    if (nextIsDark === isDark) return;
++    isDark = nextIsDark;
++    await renderChart();
++  });
++  mut.observe(document.documentElement, {
++    attributes: true,
++    attributeFilter: ["class"],
++  });
+   await renderChart();
+ 
+   //refresh images on first render

@@ -1,0 +1,2 @@
+# 依赖补丁保留原始换行和上下文空格，避免自动转换破坏 pnpm 校验。
+patches/*.patch -text -whitespace

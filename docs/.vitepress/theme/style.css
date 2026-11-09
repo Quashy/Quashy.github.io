@@ -182,3 +182,31 @@
   max-width: none !important;
 }
 
+/* 原生 fragment 跳转与 Lenis 使用相同偏移，避免图片加载后标题被导航遮住。 */
+.vp-doc :is(h1, h2, h3, h4, h5, h6)[id] {
+  scroll-margin-top: var(--site-scroll-offset, calc(var(--vp-nav-height) + 48px));
+}
+
+.vp-doc h2[id] {
+  scroll-margin-top: calc(var(--site-scroll-offset, calc(var(--vp-nav-height) + 48px)) - 24px);
+}
+
+/* 动效初始化前内容保持可见；打印与减少动态效果时立即显示所有正文。 */
+@media print, (prefers-reduced-motion: reduce) {
+  [data-motion-reveal] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+}
+
+@media print {
+  .home-profile .home-identity,
+  .home-profile .home-hero h1,
+  .home-profile .home-intro,
+  .home-profile .home-actions,
+  .home-profile .workflow,
+  .home-profile .workflow-flow {
+    animation: none !important;
+  }
+}
+
