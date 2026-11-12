@@ -34,9 +34,9 @@ const workflowSteps = [
           <nav class="home-actions" aria-label="首页主要入口">
             <a
               class="home-action home-action-primary"
-              href="/2026/from-if-else-to-rbac-abac-acl"
+              href="/2026/finance-from-scratch"
             >
-              <span>阅读权限设计文章</span>
+              <span>阅读金融入门文章</span>
               <svg
                 viewBox="0 0 24 24"
                 width="18"

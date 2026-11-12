@@ -8,6 +8,7 @@
 
 | 日期 | 标题 |
 |------|------|
+| 2026-11-12 | [从零开始的金融生活](https://quashy.github.io/2026/finance-from-scratch) |
 | 2026-09-18 | [权限不是一串 if：从硬编码到 RBAC、ABAC 与 ACL](https://quashy.github.io/2026/from-if-else-to-rbac-abac-acl) |
 | 2026-08-31 | [消息先到，不代表事情先发生：MQ 乱序下的事件时间与状态回放](https://quashy.github.io/2026/handling-out-of-order-mq-messages) |
 | 2026-08-21 | [从流程图到状态机：我怎样落地一个审批需求](https://quashy.github.io/2026/lightweight-approval-workflow) |
