@@ -28,13 +28,13 @@ const mermaidNoMaxWidth = { useMaxWidth: false }
  * 参考: https://www.npmjs.com/package/vitepress-plugin-rss
  */
 const RSS: RSSOptions = {
-  title: 'QinHuiYang 的博客',
+  title: 'Quashy 的博客',
   baseUrl: SITE_URL,
-  description: '秦晖洋的个人技术博客',
+  description: 'Quashy的个人技术博客',
   language: 'zh-cn',
-  copyright: `Copyright © ${new Date().getFullYear()} 秦晖洋`,
+  copyright: `Copyright © ${new Date().getFullYear()} Quashy`,
   author: {
-    name: '秦晖洋',
+    name: 'Quashy',
     link: 'https://github.com/Quashy',
   },
   image: SITE_URL + DEFAULT_OG_IMAGE,  // RSS 阅读器中显示的频道图标
@@ -115,9 +115,9 @@ export default withMermaid(
   /** 页面语言，影响搜索分词、时间格式等 */
   lang: "zh-CN",
   /** 站点标题，显示在浏览器标签页和导航栏左侧 */
-  title: "QinHuiYang 的博客",
+  title: "Quashy 的博客",
   /** 站点描述，用于 SEO 元标签 */
-  description: "秦晖洋的个人技术博客",
+  description: "Quashy的个人技术博客",
 
   /** 开启最后更新时间（基于 Git 提交记录） */
   lastUpdated: true,
@@ -164,7 +164,7 @@ export default withMermaid(
      * 按页面变化的 og:title / og:description / og:url / og:type / og:image
      * 由下方 transformPageData 钩子动态注入并覆盖。
      */
-    ['meta', { property: 'og:site_name', content: 'QinHuiYang 的博客' }],
+    ['meta', { property: 'og:site_name', content: 'Quashy 的博客' }],
     // og:type 默认 article；首页由 transformPageData 改写为 website
     ['meta', { property: 'og:type', content: 'article' }],
     // OG locale 用下划线（zh_CN），区别于 lang 属性的横线（zh-CN）

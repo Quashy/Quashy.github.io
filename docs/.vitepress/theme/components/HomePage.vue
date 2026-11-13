@@ -17,7 +17,7 @@ const workflowSteps = [
       <div class="home-shell home-hero-layout">
         <div class="home-hero-copy">
           <p class="home-identity">
-            <span>秦晖洋｜后端开发 × AI 工程化</span>
+            <span>Quashy｜后端开发 × AI 工程化</span>
           </p>
 
           <h1 id="home-title">把复杂问题做<span class="home-title-highlight">正确</span>，再把解法<span class="home-title-highlight">沉淀</span>下来。</h1>
