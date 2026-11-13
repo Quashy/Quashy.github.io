@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## 项目概述
 
-基于 [VitePress](https://vitepress.dev/zh/) 搭建的个人技术博客（秦晖洋），部署于 GitHub Pages（`Quashy.github.io`）。站点语言为 `zh-CN`。
+基于 [VitePress](https://vitepress.dev/zh/) 搭建的个人技术博客（Quashy），部署于 GitHub Pages（`Quashy.github.io`）。站点语言为 `zh-CN`。
 
 ## 常用命令
 

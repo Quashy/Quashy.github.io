@@ -4,7 +4,7 @@
 
 ## 项目概览
 
-- 这是秦晖洋的个人技术博客，使用 VitePress 1.x 构建，站点语言为简体中文。
+- 这是Quashy的个人技术博客，使用 VitePress 1.x 构建，站点语言为简体中文。
 - 线上地址为 <https://quashy.github.io/>，代码仓库为 <https://github.com/Quashy/Quashy.github.io>。
 - 包管理器固定为 pnpm 11，Node.js 版本不得低于 22。
 - `master` 分支的每次推送都会触发 GitHub Actions，并将静态产物部署到 GitHub Pages。

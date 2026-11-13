@@ -1,4 +1,4 @@
-# 秦晖洋的个人博客
+# Quashy的个人博客
 
 基于 [VitePress](https://vitepress.dev/zh/) 搭建的个人博客。
 
