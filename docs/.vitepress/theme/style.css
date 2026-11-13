@@ -87,6 +87,24 @@
 }
 
 /**
+ * Page: 文章阅读布局
+ * -------------------------------------------------------------------------- */
+
+@media (min-width: 1440px) {
+  :root {
+    --vp-layout-max-width: 1480px;
+  }
+
+  .VPDoc.has-aside > .container > .content > .content-container {
+    max-width: 800px;
+  }
+}
+
+.VPDoc .vp-doc p {
+  line-height: 1.9;
+}
+
+/**
  * Page: Engineering Profile Home
  * -------------------------------------------------------------------------- */
 
