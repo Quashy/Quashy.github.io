@@ -138,6 +138,10 @@ export default withMermaid(
    * 当前用于设置不蒜子统计请求的 Referrer-Policy
    */
   head: [
+    // 站点图标：现代浏览器使用 SVG，ICO 兼容默认图标请求。
+    ['link', { rel: 'icon', href: '/favicon.ico' }],
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' }],
+
     /**
      * Referrer-Policy：强制跨源请求携带完整 URL（含 path）作为 Referer
      *
