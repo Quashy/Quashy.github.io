@@ -1,3 +1,4 @@
+import { fileURLToPath, URL } from 'node:url'
 import { defineConfig } from 'vitepress'
 import { withMermaid } from 'vitepress-plugin-mermaid'
 import { RssPlugin, RSSOptions } from 'vitepress-plugin-rss'
@@ -281,6 +282,7 @@ export default withMermaid(
   // ========== 主题配置 ==========
   themeConfig: {
     // 参考文档: https://vitepress.dev/reference/default-theme-config
+    darkModeSwitchLabel: '外观',
 
     // ========== 顶部导航栏 ==========
     /**
@@ -391,6 +393,14 @@ export default withMermaid(
    */
   vite: {
     plugins: [RssPlugin(RSS)],
+    resolve: {
+      alias: [
+        {
+          find: /^.*\/VPSwitchAppearance\.vue$/,
+          replacement: fileURLToPath(new URL('./theme/components/PixelDaylightSwitch.vue', import.meta.url)),
+        },
+      ],
+    },
   },
 
   // ========== Mermaid 配置 ==========

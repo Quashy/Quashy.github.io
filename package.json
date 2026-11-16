@@ -30,6 +30,7 @@
     "lenis": "1.3.27",
     "medium-zoom": "^1.1.0",
     "mermaid": "^11.16.0",
+    "pixel-daylight-switch-gsvegetable": "3.1.1",
     "vitepress": "^1.6.4",
     "vitepress-plugin-mermaid": "^2.0.17",
     "vitepress-plugin-rss": "^0.4.4"

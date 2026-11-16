@@ -1,0 +1,44 @@
+diff --git a/app.js b/app.js
+index dc9193c53c5f2a8431030272cf96e2a80a5a4b7d..cc0099a231b69754fc13bbb4445d3e9bb0199087 100644
+--- a/app.js
++++ b/app.js
+@@ -1196,7 +1196,8 @@ function mount(root) {
+   let renderScale = 1; let fullK = 1; let thumbSeam = 1;
+   const pickK = (winH) => { const whole = Math.max(1, Math.floor(winH / CORE_H)); return ((whole + 1) * CORE_H) / winH <= 1.12 ? whole + 1 : whole; };
+   const measure = () => {
+-    const box = root.getBoundingClientRect(); const fullDpr = Math.min(2, devicePixelRatio || 1); const nextFullK = pickK((Math.round(box.height * fullDpr) / 1.32) * (1 - bezelRatio * 2));
++    // 小尺寸下保留完整像素场景的绘制分辨率，由 Canvas 的 CSS 尺寸等比缩小。
++    const box = root.getBoundingClientRect(); const fullDpr = Math.max(Math.min(2, devicePixelRatio || 1), 320 / Math.max(box.width, 1)); const nextFullK = pickK((Math.round(box.height * fullDpr) / 1.32) * (1 - bezelRatio * 2));
+     if (nextFullK !== fullK) { fullK = nextFullK; renderScale = 1; }
+     const dpr = fullDpr * renderScale; const W = Math.max(2, Math.round(box.width * dpr)); const H = Math.max(2, Math.round(box.height * dpr)); const changed = W !== shape.W || H !== shape.H;
+     shape.W = W; shape.H = H; shape.cssW = box.width; shape.cssH = box.height; shape.dpr = dpr;
+@@ -1236,6 +1237,13 @@ function mount(root) {
+     if (checked !== night) { checked = night; button.setAttribute('aria-checked', String(night)); root.dispatchEvent(new CustomEvent('daylight:change', { bubbles: true, composed: true, detail: { night } })); }
+     setStatus(night ? (locale === 'ja' ? '夜' : locale === 'zh-CN' ? '夜晚' : 'Night') : (locale === 'ja' ? '昼' : locale === 'zh-CN' ? '白天' : 'Day'));
+   };
++  // 目标确认时同步宿主主题，保留 change 事件在动画结束时的原有语义。
++  const announceTarget = () => {
++    if (target !== 0 && target !== 1) return;
++    const night = target === 1;
++    button.setAttribute('aria-checked', String(night));
++    root.dispatchEvent(new CustomEvent('daylight:target', { bubbles: true, composed: true, detail: { night } }));
++  };
+   const drawGl = (night) => {
+     gl.clearColor(0, 0, 0, 0); gl.clear(gl.COLOR_BUFFER_BIT); gl.useProgram(program); gl.bindVertexArray(vao);
+     gl.uniform2f(loc.uRes, shape.W, shape.H); gl.uniform2f(loc.uPill, shape.pillW / 2, shape.pillH / 2); gl.uniform2f(loc.uOrigin, shape.ox, shape.oy); gl.uniform2f(loc.uWorldSize, bw, bh); gl.uniform2f(loc.uGlowSize, GRID_W, GRID_H); gl.uniform1f(loc.uBezel, shape.bezel); gl.uniform1f(loc.uDispersion, dispersion); gl.uniform1f(loc.uShine, shine); gl.uniform1f(loc.uRefraction, refraction); gl.uniform1f(loc.uK, k); gl.uniform1f(loc.uNight, night); gl.uniform1f(loc.uLift, lift); gl.uniform1f(loc.uSeam, thumbSeam); gl.uniform1f(loc.uCalm, calm ? 1 : 0);
+@@ -1280,12 +1288,12 @@ function mount(root) {
+   let suppressClick = 0;
+   on(button, 'pointerdown', (event) => { if (event.button !== 0) return; beginTravel(); moving = false; drag = { id: event.pointerId, start: event.clientX, from: x, want: x, moved: false, lastX: event.clientX, lastT: performance.now(), speed: 0 }; liftTarget = 1; try { button.setPointerCapture(event.pointerId); } catch { } wake(); });
+   on(button, 'pointermove', (event) => { if (!drag || event.pointerId !== drag.id) return; const dx = event.clientX - drag.start; if (Math.abs(dx) > 3) drag.moved = true; drag.want = drag.from + dx / Math.max(shape.travelCss, 1); const nowMs = performance.now(); const dtMs = Math.max(nowMs - drag.lastT, 4); const speed = (event.clientX - drag.lastX) / Math.max(shape.travelCss, 1) / (dtMs / 1000); drag.speed = drag.speed * 0.6 + speed * 0.4; drag.lastX = event.clientX; drag.lastT = nowMs; if (Math.abs(drag.speed) > 3.4) startle(); wake(); });
+-  const release = (event) => { if (!drag || event.pointerId !== drag.id) return; const wasMoved = drag.moved; const speed = drag.speed; drag = null; liftTarget = 0; if (wasMoved) { suppressClick = performance.now() + 300; target = x + speed * 0.09 >= 0.5 ? 1 : 0; velocity = clamp(speed * (1.6 - friction), -3, 3); moving = true; } wake(); };
++  const release = (event) => { if (!drag || event.pointerId !== drag.id) return; const wasMoved = drag.moved; const speed = drag.speed; drag = null; liftTarget = 0; if (wasMoved) { suppressClick = performance.now() + 300; target = x + speed * 0.09 >= 0.5 ? 1 : 0; velocity = clamp(speed * (1.6 - friction), -3, 3); moving = true; announceTarget(); } wake(); };
+   on(button, 'pointerup', release); on(button, 'pointercancel', release); on(button, 'lostpointercapture', release);
+-  const toggle = () => { beginTravel(); target = (moving ? target >= 0.5 : x >= 0.5) ? 0 : 1; moving = true; wake(); };
++  const toggle = () => { beginTravel(); target = (moving ? target >= 0.5 : x >= 0.5) ? 0 : 1; moving = true; announceTarget(); wake(); };
+   on(button, 'click', () => { if (performance.now() < suppressClick) return; toggle(); });
+   const STEP = 0.04;
+-  on(button, 'keydown', (event) => { let dir = 0; if (event.key === 'ArrowRight' || event.key === 'ArrowUp') dir = 1; else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') dir = -1; if (!dir) return; event.preventDefault(); beginTravel(); const from = moving ? target : x; target = clamp(from + dir * STEP); moving = true; setStatus(phaseName(hourOf(branch === 'am' ? mix(36, amStart, target) : CLOCK_DAY + (CLOCK_NIGHT - CLOCK_DAY) * target))); wake(); });
++  on(button, 'keydown', (event) => { let dir = 0; if (event.key === 'ArrowRight' || event.key === 'ArrowUp') dir = 1; else if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') dir = -1; if (!dir) return; event.preventDefault(); beginTravel(); const from = moving ? target : x; target = clamp(from + dir * STEP); moving = true; announceTarget(); setStatus(phaseName(hourOf(branch === 'am' ? mix(36, amStart, target) : CLOCK_DAY + (CLOCK_NIGHT - CLOCK_DAY) * target))); wake(); });
+   const io = new IntersectionObserver((entries) => { visible = entries.some((e) => e.isIntersecting); if (visible) { dirty = true; wake(); } else { stopDrawing(); } });
+   io.observe(root);
+   on(root.ownerDocument, 'visibilitychange', () => { pageVisible = root.ownerDocument.visibilityState !== 'hidden'; if (pageVisible) { dirty = true; wake(); if (lost) waitForRestore(); } else { stopDrawing(); clearTimeout(restoreTimer); } });

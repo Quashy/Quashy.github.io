@@ -3,6 +3,27 @@
  * https://github.com/vuejs/vitepress/blob/main/src/client/theme-default/styles/vars.css
  */
 
+/* 全页柔和渐变；开关独立显示，继续播放自身的滑动动画。 */
+::view-transition {
+  pointer-events: none;
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 250ms;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-group(theme-switch),
+::view-transition-new(theme-switch) {
+  animation: none;
+}
+
+::view-transition-old(theme-switch) {
+  display: none;
+}
+
 /**
  * Colors
  *

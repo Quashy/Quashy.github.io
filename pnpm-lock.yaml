@@ -185,6 +185,7 @@ settings:
   excludeLinksFromLockfile: false
 
 patchedDependencies:
+  pixel-daylight-switch-gsvegetable@3.1.1: 3018cd0ebc5decd44a3e90bd9e080df3c54a855ac4cc6a4c494969d33b6a7361
   vitepress-plugin-mermaid@2.0.17: 15eb8721657037c0b0c13ab2db838b4c2c3f73e7b936f7a686bb9f72ba1aa6b7
 
 importers:
@@ -218,6 +219,9 @@ importers:
       mermaid:
         specifier: ^11.16.0
         version: 11.16.0
+      pixel-daylight-switch-gsvegetable:
+        specifier: 3.1.1
+        version: 3.1.1(patch_hash=3018cd0ebc5decd44a3e90bd9e080df3c54a855ac4cc6a4c494969d33b6a7361)
       vitepress:
         specifier: ^1.6.4
         version: 1.6.4(@algolia/client-search@5.55.1)(postcss@8.5.16)(search-insights@2.17.3)
@@ -1488,6 +1492,10 @@ packages:
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
+
+  pixel-daylight-switch-gsvegetable@3.1.1:
+    resolution: {integrity: sha512-tYyJqwrzn+2nBN16gjgBtcK4hlH3UJa3sRge0lhLbv8T2WRWHzfBzPgkxLz4AWuuV3KT25bcwCAvEm925IVGhg==}
+    engines: {node: '>=16'}
 
   points-on-curve@0.2.0:
     resolution: {integrity: sha512-0mYKnYYe9ZcqMCWhUjItv/oHjvgEsfKvnUTg8sAtnHr3GVy7rGkXCb6d5cSyqrWqL4k81b9CPg3urd+T7aop3A==}
@@ -2922,6 +2930,8 @@ snapshots:
   perfect-debounce@1.0.0: {}
 
   picocolors@1.1.1: {}
+
+  pixel-daylight-switch-gsvegetable@3.1.1(patch_hash=3018cd0ebc5decd44a3e90bd9e080df3c54a855ac4cc6a4c494969d33b6a7361): {}
 
   points-on-curve@0.2.0: {}
 

@@ -2,4 +2,5 @@ allowBuilds:
   esbuild: true
   sharp: false
 patchedDependencies:
+  pixel-daylight-switch-gsvegetable@3.1.1: patches/pixel-daylight-switch-gsvegetable@3.1.1.patch
   vitepress-plugin-mermaid@2.0.17: patches/vitepress-plugin-mermaid@2.0.17.patch
