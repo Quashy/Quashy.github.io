@@ -2,22 +2,22 @@
 
 基于 [VitePress](https://vitepress.dev/zh/) 搭建的个人博客。
 
-🌐 站点地址：<https://quashy.github.io/>
+🌐 站点地址：[https://quashy.github.io/](https://quashy.github.io/)
 
 ## 文章列表
 
-| 日期 | 标题 |
-|------|------|
+| 日期       | 标题                                                                                                                                  |
+| ---------- | ------------------------------------------------------------------------------------------------------------------------------------- |
 | 2026-11-17 | [从桌面养猫到一句话记账：我的三个 Personal Agent 小实践](https://quashy.github.io/2026/three-small-projects) |
-| 2026-11-12 | [从零开始的金融生活](https://quashy.github.io/2026/finance-from-scratch) |
-| 2026-09-18 | [权限不是一串 if：从硬编码到 RBAC、ABAC 与 ACL](https://quashy.github.io/2026/from-if-else-to-rbac-abac-acl) |
-| 2026-08-31 | [消息先到，不代表事情先发生：MQ 乱序下的事件时间与状态回放](https://quashy.github.io/2026/handling-out-of-order-mq-messages) |
-| 2026-08-21 | [从流程图到状态机：我怎样落地一个审批需求](https://quashy.github.io/2026/lightweight-approval-workflow) |
+| 2026-11-12 | [从零开始的金融生活](https://quashy.github.io/2026/finance-from-scratch)                             |
+| 2026-09-18 | [权限不是一串 if：从硬编码到 RBAC、ABAC 与 ACL](https://quashy.github.io/2026/from-if-else-to-rbac-abac-acl)                           |
+| 2026-08-31 | [消息先到，不代表事情先发生：MQ 乱序下的事件时间与状态回放](https://quashy.github.io/2026/handling-out-of-order-mq-messages)           |
+| 2026-08-21 | [从流程图到状态机：我怎样落地一个审批需求](https://quashy.github.io/2026/lightweight-approval-workflow)                                |
 | 2026-08-18 | [一次登录，到底发生了什么：从 Session 到 SSO、OAuth 2.0、OIDC 与 SAML](https://quashy.github.io/2026/understanding-sso-auth-protocols) |
-| 2026-07-19 | [从全拼到双拼：我为什么做了「并击」](https://quashy.github.io/2026/from-quanpin-to-shuangpin) |
-| 2026-07-16 | [如何参与开源项目](https://quashy.github.io/2026/how-to-contribute-to-open-source) |
-| 2026-07-14 | [人生设计：探索你的现在](https://quashy.github.io/2026/designing-your-life) |
-| 2026-06-30 | [OpenCode GO 接入 CC Switch 指南](https://quashy.github.io/2026/opencode-go-ccw) |
+| 2026-07-19 | [从全拼到双拼：我为什么做了「并击」](https://quashy.github.io/2026/from-quanpin-to-shuangpin)                                          |
+| 2026-07-16 | [如何参与开源项目](https://quashy.github.io/2026/how-to-contribute-to-open-source)                                                     |
+| 2026-07-14 | [人生设计：探索你的现在](https://quashy.github.io/2026/designing-your-life)                                                            |
+| 2026-06-30 | [OpenCode GO 接入 CC Switch 指南](https://quashy.github.io/2026/opencode-go-ccw)                                                       |
 
 ## 专题索引
 
@@ -67,4 +67,5 @@ pnpm docs:preview
 ```
 
 ## Ref
+
 - vitepress 安装 图片放大、访客统计、Mermaid 等插件：[https://vitepress.yiov.top/](https://vitepress.yiov.top/)
