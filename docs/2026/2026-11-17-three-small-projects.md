@@ -19,7 +19,7 @@ description: 把自己的猫做成桌宠，把微信读书笔记同步到 Notion
 
 ![个人知识库的工作、学习、生活和归档目录](/three-small-projects/06-personal-notebook-structure.png)
 
-Personal Agent 的我是很认可的，相当于有一个 AI 助手来帮你打点你的一切生活琐事，你只需要用自然语言交代需求，Agent 负责判断、理解、生成，并且天然很适合 Notion 这样的云端笔记，因为可以跑在云端环境里。Obsidian 这样的本地笔记的话 Personal Agent 就只能跑在本地了，需要电脑一直不关机。其实已经好久没用 Obsidian 了。
+Personal Agent 我是很认可的，产品包括有 ChatGPT Dot（Pro可用）、Grok Bot（首月15刀）、Muse（免费），相当于有一个 AI 助手来帮你打点你的一切生活琐事，你只需要用自然语言交代需求，Agent 负责判断、理解、生成，并且天然很适合 Notion 这样的云端笔记，因为可以跑在云端环境里。Obsidian 这样的本地笔记的话 Personal Agent 就只能跑在本地了，需要电脑一直不关机。其实已经好久没用 Obsidian 了。
 
 我也一直在探索人生 ALL IN ONE，之前觉得是有强大插件系统的 Obsidian，再后来是可以轻松和大家协作、分享页面的 wolai，AI 时代我想把答案给到带有 CLI/MCP 的 Notion。
 
@@ -102,7 +102,7 @@ https://raw.githubusercontent.com/Quashy/notion-finance-ai/main/docs/AI_SETUP.md
 
 现在软件的入口，我觉得已经从传统的界面变成 AI 对话式了，属于是一旦用过一次就回不去原来的各种软件的复杂界面自行操作的模式了，Personal Agent 可以配合 Notion 等笔记类软件用 AI 管理知识、日记、财务，甚至可以做到商业级 CRM 系统的效果。要做的只需要打通各软件之间的壁垒。
 
-### **模型能读更多，人不一定愿意读更多**
+### 模型能读更多，人不一定愿意读更多
 
 想要做好一个软件一定要从用户、软件使用者的角度出发。
 
@@ -118,7 +118,7 @@ AI 时代下，各家 LLM 的注意力与上下文窗口在无限变强与放大
 
 README 要让人看懂项目、知道怎么开始用；给 Agent 的则要把配置和操作交代清楚，让它读完就能动手。
 
-软件的使用者现在不仅仅是人类，CLI/MCP/skill 等等方式，让软件越来越容易被集成到已有的系统和 AI Agent 中，下次再做产品做功能不妨想想，你的软件可以很好的被接入 AI
+软件的使用者现在不仅仅是人类，CLI/MCP/Skill 等等方式，让软件越来越容易被集成到已有的系统和 AI Agent 中，下次再做产品做功能不妨想想，你的软件可以很好的被接入 AI
 
 ## 0xFF 写在最后
 
