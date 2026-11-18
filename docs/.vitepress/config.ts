@@ -25,7 +25,7 @@ const mermaidNoMaxWidth = { useMaxWidth: false }
 
 /**
  * RSS 订阅源配置（vitepress-plugin-rss）
- * 构建时自动产出 feed.rss，供 RSS 阅读器订阅
+ * 构建时自动产出 feed.xml，供 RSS 阅读器订阅
  * 参考: https://www.npmjs.com/package/vitepress-plugin-rss
  */
 const RSS: RSSOptions = {
@@ -217,8 +217,8 @@ export default withMermaid(
    * 数据来源：
    *   og:title        <- pageData.title（VitePress 已从 frontmatter title 或 H1 解析）
    *   og:description  <- frontmatter.description（回退站点 description）
-   *   og:url/canonical<- 由 relativePath 计算（与 sitemap 同规则：index.md→/，其余→.html）
-   *   og:type         <- 首页 website，其余 article
+   *   og:url/canonical<- 根 index.md→/，目录 index.md→目录 URL，其余→.html
+   *   og:type         <- 首页与目录索引 website，普通文章 article
    *   og:image        <- frontmatter.ogImage（回退站点默认 /og.png）
    *   twitter:card    <- 有 ogImage 用 summary_large_image，否则降级 summary
    *   article:modified_time <- pageData.lastUpdated（毫秒时间戳，dayjs.utc 格式化）
@@ -227,10 +227,14 @@ export default withMermaid(
     const fm = pageData.frontmatter || {}
 
     // 1. canonical / og:url（与 sitemap 内部 URL 规则对齐）
-    const isHome = /(^|\/)index\.md$/.test(pageData.relativePath)
+    const relativePath = pageData.relativePath.replace(/\\/g, '/')
+    const isHome = relativePath === 'index.md'
+    const isDirectoryIndex = relativePath.endsWith('/index.md')
     const pageUrl = isHome
       ? '/'
-      : '/' + pageData.relativePath.replace(/\.md$/, '.html')
+      : isDirectoryIndex
+        ? '/' + relativePath.slice(0, -'index.md'.length)
+        : '/' + relativePath.replace(/\.md$/, '.html')
     const canonical = SITE_URL + pageUrl
 
     // 2. title / description
@@ -243,8 +247,8 @@ export default withMermaid(
     // 4. twitter:card：无专属图时降级为小卡
     const twitterCard = fm.ogImage ? 'summary_large_image' : 'summary'
 
-    // 5. og:type：首页 website，其余 article
-    const ogType = isHome ? 'website' : 'article'
+    // 5. 首页与目录索引为 website，普通文章为 article
+    const ogType = isHome || isDirectoryIndex ? 'website' : 'article'
 
     // 6. article:modified_time（lastUpdated 为毫秒时间戳；未 commit 的文章可能为 0，需守卫）
     const articleMeta: [string, Record<string, string>][] = []
@@ -394,7 +398,7 @@ export default withMermaid(
   // ========== Vite 插件 ==========
   /**
    * vite.plugins: Vite 构建期插件
-   * - RssPlugin: 构建时自动生成 feed.rss
+   * - RssPlugin: 构建时自动生成 feed.xml
    */
   vite: {
     plugins: [RssPlugin(RSS)],

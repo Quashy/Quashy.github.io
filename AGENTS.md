@@ -14,7 +14,8 @@
 
 | 路径 | 职责 |
 | --- | --- |
-| `docs/index.md` | 博客首页，以及「浏览文章」入口 |
+| `docs/index.md` | 博客首页元信息与自定义首页组件入口 |
+| `docs/.vitepress/theme/components/HomePage.vue` | 首页内容与「浏览文章」入口 |
 | `docs/{year}/YYYY-MM-DD-<slug>.md` | 按年份保存的文章正文，文件名日期前缀用于 IDE 排序 |
 | `docs/public/<slug>/` | 文章本地图片等静态资源 |
 | `docs/.vitepress/config.ts` | 顶部导航、侧边栏、搜索和站点元信息 |
@@ -53,8 +54,9 @@ pnpm docs:preview
 - `docs/.vitepress/config.ts` 的 `rewrites` 会在构建路由中移除日期前缀；导航、侧边栏、README 和站内链接始终使用不含日期前缀的稳定公开路由，例如 `/2026/from-quanpin-to-shuangpin`。
 - 文章至少包含 `date`、`title` 和 `outline: deep` frontmatter，并在正文保留与标题一致的一级标题。`date` 格式为 `YYYY-MM-DD HH:mm`（北京时间），供 RSS 订阅源生成准确的发布时间。
 - 正文章节以二级标题为主，需要细分时使用三级标题，使右侧目录能够正确生成。
-- 图片复制到 `docs/public/<slug>/`，使用 `01.png`、`02.png` 等稳定文件名；保留源文件，不执行移动或删除。
-- Markdown 中使用根路径引用图片，例如 `![说明](/<slug>/01.png)`，并提供有意义的替代文本。
+- 新图片复制到 `docs/public/<slug>/`，按 `序号-内容名.png` 语义化命名，例如 `01-workflow-overview.png`；保留源文件，不追溯重命名历史图片。
+- 源图与制作过程档案保留在发布目录之外；发布目录只保留实际使用的资源，同图复用同一文件，不额外复制一份。
+- Markdown 中使用根路径引用图片，例如 `![说明](/<slug>/01-workflow-overview.png)`，并提供有意义的替代文本。
 - 引用外部资料时提供原始链接，提炼观点，不大段复制原文。
 
 ## 新文章发布协议
@@ -64,7 +66,7 @@ pnpm docs:preview
 1. 新增 `docs/{year}/YYYY-MM-DD-<slug>.md`，并补齐其本地资源。
 2. 在 `docs/.vitepress/config.ts` 对应年份的 `sidebar.items` 顶部登记文章。
 3. 将 `docs/.vitepress/config.ts` 顶部导航「文章」的 `link` 更新为新文章路由。
-4. 将 `docs/index.md` 首页「浏览文章」按钮的 `link` 更新为同一路由。
+4. 将 `docs/.vitepress/theme/components/HomePage.vue` 首页「浏览文章」按钮的 `href` 更新为同一路由。
 5. 在 `README.md` 的文章列表顶部新增日期、标题和完整线上链接。
 
 统一先确定以下五个值，再复制到所有入口，避免手工重复拼写时产生漂移：
@@ -95,7 +97,7 @@ $articleDate = "2026-07-19"
 $articleRoute = "/2026/$articleSlug"
 
 Test-Path -LiteralPath "docs/2026/$articleDate-$articleSlug.md"
-rg -n --fixed-strings "$articleRoute" "docs/.vitepress/config.ts" "docs/index.md" "README.md"
+rg -n --fixed-strings "$articleRoute" "docs/.vitepress/config.ts" "docs/.vitepress/theme/components/HomePage.vue" "README.md"
 pnpm docs:build
 Test-Path -LiteralPath "docs/.vitepress/dist/2026/$articleSlug.html"
 git diff --check
@@ -105,7 +107,7 @@ git status --short
 路由搜索的预期结果为：
 
 - `docs/.vitepress/config.ts` 出现两次：顶部导航一次、侧边栏一次。
-- `docs/index.md` 出现一次：首页「浏览文章」按钮。
+- `docs/.vitepress/theme/components/HomePage.vue` 出现一次：首页「浏览文章」按钮。
 - `README.md` 出现一次：完整线上链接中包含相同路由。
 
 如果结果数量不符，先修正入口，再继续提交。不要为了让检查通过而把同一路由写入无关位置。

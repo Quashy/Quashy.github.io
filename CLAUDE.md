@@ -22,7 +22,8 @@ pnpm docs:preview     # 本地预览构建产物
 ### 内容与配置分离
 
 - `docs/` 为内容根目录，其中 `.vitepress/` 存放配置与主题，其余子目录按年份存放博文。
-- `docs/index.md` — 首页（使用 VitePress `home` layout + frontmatter 配置 hero/features）。
+- `docs/index.md` — 首页元信息，使用 VitePress `home` layout 并渲染自定义 `HomePage.vue`。
+- `docs/.vitepress/theme/components/HomePage.vue` — 首页内容与「浏览文章」按钮，发布新文章时更新其 `href`。
 - `docs/{year}/` — 按年份分目录组织文章（当前仅有 `2026/`）。新增文章时需在 `docs/.vitepress/config.ts` 的 `sidebar` 中登记，并在必要时更新 `nav`。
 - Markdown 文件可通过 frontmatter 控制行为（如 `outline: deep`、`layout: home`）。
 
@@ -58,15 +59,16 @@ pnpm docs:preview     # 本地预览构建产物
 
 - Obsidian 默认图片名为 `Pasted image <时间戳>.png`（含空格），存放在笔记同级的 `img/` 目录。
 - **复制而非移动**源文件到 `docs/public/<文章 slug>/` 子目录，保留 Obsidian 原件。
-- **语义化重命名**：按文章中出现顺序重命名为 `01.png`、`02.png`…，避免空格与无意义命名，便于长期维护。
+- **新图片语义命名**：使用 `序号-内容名.png`，例如 `01-workflow-overview.png`；描述图片内容，不追溯重命名历史图片。
+- 源图与制作过程档案留在发布目录之外；`docs/public/<文章 slug>/` 只保留实际使用的资源，不保留同图的重复文件。
 - 源路径含空格时，`cp` 命令需用双引号包裹：`cp "源路径" "目标路径"`。
-- 若同一张图在源文中重复出现，迁移时**删除冗余引用**，仅保留首次出现处。
+- 若同一张图在正文多次出现，复用同一资源路径；保留有上下文意义的引用，不擅自改动正文。
 
 ### 2. Markdown 内容转换
 
 - **Frontmatter**：添加 `title: <博客标题>` 与 `outline: deep`，并在正文保留与标题一致的 `#` 一级标题，延续现有文章结构。
 - **标题层级**：源稿常用 `###`（h3）作为章节标题，迁移时**提升为 `##`（h2）**，以匹配 `config.ts` 中 `outline: { level: [2, 3] }` 配置，让右侧目录正常展示。
-- **图片路径改写**：`![](img/Pasted image *.png)` → `![描述性 alt 文本](/<slug>/NN.png)`，使用根路径引用并补充有意义的 alt。
+- **图片路径改写**：`![](img/Pasted image *.png)` → `![描述性 alt 文本](/<slug>/01-workflow-overview.png)`，使用根路径引用并补充有意义的 alt。
 - 保留原文的文字内容、列表、引用块、分隔线 `---`、外部链接等结构。
 
 ### 3. 站点配置登记
@@ -75,11 +77,12 @@ pnpm docs:preview     # 本地预览构建产物
 
 - `docs/.vitepress/config.ts` 的 `sidebar`：在对应年份分组 `items` 中登记新文章。
 - `docs/.vitepress/config.ts` 的 `nav`：若「文章」入口需指向最新文章则更新。
-- `docs/index.md` 的 `hero.actions`：「浏览文章」按钮 `link` 指向新文章。
+- `docs/.vitepress/theme/components/HomePage.vue`：「浏览文章」按钮 `href` 指向新文章。
 - `README.md` 的文章列表：在顶部新增发布日期、标题和完整线上链接。
 
 ### 4. 验证与提交
 
-- 运行 `pnpm docs:build` 确认无报错（图片路径错误、frontmatter 语法错误均会在此暴露）。
+- 按 `AGENTS.md` 的机械检查，同时检索 `config.ts`、`HomePage.vue` 和 README 的公开路由。
+- 运行 `pnpm docs:build`，并检查生成页面的图片和元信息，确认资源引用与 frontmatter 正确。
 - 可选 `pnpm docs:dev` 人工复核：图片加载、链接跳转、右侧目录、本地搜索。
 - 文章 slug 使用英文短横线命名（如 `opencode-go-ccw`）；正文文件为 `docs/{year}/YYYY-MM-DD-<slug>.md`，日期与 frontmatter `date` 一致。`docs/public/<slug>/` 与公开路由仍只使用 slug，构建时由 `rewrites` 移除正文文件的日期前缀。

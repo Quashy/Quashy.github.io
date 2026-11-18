@@ -39,6 +39,7 @@ personalspace
 │   ├─ 2026             # 按年份存放博文
 │   ├─ internship-summary # 实习总结索引
 │   └─ public           # 静态资源（图片等）
+├─ patches              # 依赖行为修正补丁，由 pnpm-workspace.yaml 登记
 ├─ .gitignore           # Git 提交忽略配置
 ├─ AGENTS.md            # AI 工具协作与文章发布规范
 ├─ package.json         # Node.js 配置

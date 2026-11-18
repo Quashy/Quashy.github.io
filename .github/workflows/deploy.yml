@@ -35,6 +35,8 @@ jobs:
           cache: pnpm
       - run: pnpm install
       - name: Build
+        env:
+          TZ: Asia/Shanghai
         run: pnpm run docs:build
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
