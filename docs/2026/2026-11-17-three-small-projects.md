@@ -1,11 +1,11 @@
 ---
 date: 2026-11-17 13:36
-title: 从桌面养猫到一句话记账：我做了三个小项目之后
+title: 从桌面养猫到一句话记账：我的三个 Personal Agent 小实践
 outline: deep
 ogImage: /three-small-projects/04-conversation-drawer-cover.png
 description: 把自己的猫做成桌宠，把微信读书笔记同步到 Notion，再用一句话记账。做完三个小项目之后，我重新想了对话与界面、产品表达，以及软件怎样才能被 Agent 用好。
 ---
-# 从桌面养猫到一句话记账：我做了三个小项目之后
+# 从桌面养猫到一句话记账：我的三个 Personal Agent 小实践
 
 ![小黑拉开以对话气泡作把手的抽屉，查看猫、读书笔记和账单，边用边改自己的小工具](/three-small-projects/04-conversation-drawer-cover.png)
 
