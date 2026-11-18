@@ -6,6 +6,7 @@ import mediumZoom from 'medium-zoom'
 import 'lenis/dist/lenis.css'
 import './style.css'
 import PageView from './components/PageView.vue'
+import ArticleShare from './components/ArticleShare.vue'
 import { triggerBusuanzi } from './composables/useBusuanzi'
 import { useSiteMotion } from './composables/useSiteMotion'
 
@@ -16,6 +17,8 @@ const MotionLayout = defineComponent({
     return () => h(DefaultTheme.Layout, null, {
       // 文章正文底部：本文阅读量（组件内部按路径判断是否渲染）
       'doc-after': () => h(PageView),
+      'aside-outline-after': () => h(ArticleShare, { placement: 'aside' }),
+      'doc-before': () => h(ArticleShare, { placement: 'inline' }),
     })
   },
 })
